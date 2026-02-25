@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import {
   Plus,
+  Menu,
   MessageSquare,
   Trash2,
   LogOut,
-  ChevronLeft,
+  X,
   Zap,
   Crown,
   Sparkles,
@@ -102,151 +103,149 @@ export default function ChatSidebar({
     return (
       <button
         onClick={onToggle}
-        className="fixed left-2 top-4 z-50 w-8 h-8 flex items-center justify-center rounded-lg bg-sidebar hover:bg-sidebar-hover text-gray-400 hover:text-white transition-colors"
+        className="fixed left-3 top-3.5 z-50 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
+        title="Open sidebar"
       >
-        <MessageSquare size={16} />
+        <Menu size={20} />
       </button>
     )
   }
 
   return (
     <>
-      {/* Mobile backdrop — tap to close */}
+      {/* Mobile backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-30 md:hidden"
+        className="fixed inset-0 bg-black/20 z-30 md:hidden"
         onClick={onToggle}
       />
-      {/* Sidebar — overlay on mobile, inline on desktop */}
-    <div className="fixed left-0 top-0 h-full z-40 w-72 md:w-64 md:static md:z-auto bg-sidebar flex flex-col flex-shrink-0">
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 pt-3 pb-2">
-        <div className="flex items-center gap-2 px-1">
-          <Image src="/logo.png" alt="AngkorAI" width={24} height={24} className="rounded-full" />
-          <span className="font-semibold text-sm text-white">AngkorAI</span>
-        </div>
-        <button
-          onClick={onToggle}
-          className="p-1.5 rounded-lg hover:bg-sidebar-hover text-gray-400 hover:text-white transition-colors"
-        >
-          <ChevronLeft size={16} />
-        </button>
-      </div>
-
-      {/* New Chat */}
-      <div className="px-3 mb-2">
-        <button
-          onClick={onNewChat}
-          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-sidebar-hover text-gray-300 hover:text-white text-sm transition-colors group"
-        >
-          <Plus size={16} className="text-gray-400 group-hover:text-white" />
-          {lang === 'kh' ? (
-            <span className="font-khmer">ការសន្ទនាថ្មី</span>
-          ) : (
-            'New chat'
-          )}
-        </button>
-      </div>
-
-      {/* Conversations list */}
-      <div className="flex-1 overflow-y-auto px-3 space-y-0.5">
-        {conversations.length === 0 && (
-          <p className="text-gray-500 text-xs text-center py-8">
-            {lang === 'kh' ? 'មិនមានការសន្ទនា' : 'No conversations yet'}
-          </p>
-        )}
-        {conversations.map((conv) => (
-          <div
-            key={conv.id}
-            onClick={() => onSelectConv(conv.id)}
-            className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-colors ${
-              activeConvId === conv.id
-                ? 'bg-sidebar-hover text-white'
-                : 'text-gray-300 hover:bg-sidebar-hover/60 hover:text-white'
-            }`}
+      {/* Sidebar */}
+      <div className="fixed left-0 top-0 h-full z-40 w-72 md:w-64 md:static md:z-auto bg-sidebar border-r border-gray-200 flex flex-col flex-shrink-0">
+        {/* Header */}
+        <div className="flex items-center justify-between px-3 pt-3 pb-2">
+          <div className="flex items-center gap-2 px-1">
+            <Image src="/logo.png" alt="AngkorAI" width={24} height={24} className="rounded-full" />
+            <span className="font-semibold text-sm text-gray-900">AngkorAI</span>
+          </div>
+          <button
+            onClick={onToggle}
+            className="p-1.5 rounded-lg hover:bg-sidebar-hover text-gray-400 hover:text-gray-700 transition-colors"
+            title="Close sidebar"
           >
-            <MessageSquare size={14} className="flex-shrink-0 text-gray-500" />
-            <span className="flex-1 text-sm truncate">{conv.title}</span>
-            <button
-              onClick={(e) => handleDelete(e, conv.id)}
-              className={`flex-shrink-0 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-red-500/20 hover:text-red-400 transition-all ${
-                deletingId === conv.id ? 'opacity-100 animate-pulse' : ''
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* New Chat */}
+        <div className="px-3 mb-2">
+          <button
+            onClick={onNewChat}
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-sidebar-hover text-gray-600 hover:text-gray-900 text-sm transition-colors group"
+          >
+            <Plus size={16} className="text-gray-400 group-hover:text-gray-700" />
+            {lang === 'kh' ? (
+              <span className="font-khmer">ការសន្ទនាថ្មី</span>
+            ) : (
+              'New chat'
+            )}
+          </button>
+        </div>
+
+        {/* Conversations list */}
+        <div className="flex-1 overflow-y-auto px-3 space-y-0.5">
+          {conversations.length === 0 && (
+            <p className="text-gray-400 text-xs text-center py-8">
+              {lang === 'kh' ? 'មិនមានការសន្ទនា' : 'No conversations yet'}
+            </p>
+          )}
+          {conversations.map((conv) => (
+            <div
+              key={conv.id}
+              onClick={() => onSelectConv(conv.id)}
+              className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-colors ${
+                activeConvId === conv.id
+                  ? 'bg-sidebar-hover text-gray-900'
+                  : 'text-gray-600 hover:bg-sidebar-hover hover:text-gray-900'
               }`}
             >
-              <Trash2 size={13} />
+              <MessageSquare size={14} className="flex-shrink-0 text-gray-400" />
+              <span className="flex-1 text-sm truncate">{conv.title}</span>
+              <button
+                onClick={(e) => handleDelete(e, conv.id)}
+                className={`flex-shrink-0 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-red-100 hover:text-red-500 transition-all ${
+                  deletingId === conv.id ? 'opacity-100 animate-pulse' : ''
+                }`}
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Usage & Upgrade */}
+        <div className="px-3 py-3 border-t border-gray-200 space-y-3">
+          {/* Usage bar */}
+          {dailyLimit !== Infinity && remaining !== null && (
+            <div>
+              <div className="flex justify-between text-xs text-gray-500 mb-1.5">
+                <span>{lang === 'kh' ? 'សារថ្ងៃនេះ' : 'Messages today'}</span>
+                <span>{dailyLimit - remaining}/{dailyLimit}</span>
+              </div>
+              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-accent rounded-full transition-all"
+                  style={{ width: `${((dailyLimit - remaining) / dailyLimit) * 100}%` }}
+                />
+              </div>
+              {remaining <= 5 && remaining > 0 && (
+                <p className="text-xs text-yellow-600 mt-1">
+                  {lang === 'kh' ? `នៅសល់ ${remaining} សារ` : `${remaining} messages left today`}
+                </p>
+              )}
+              {remaining === 0 && (
+                <p className="text-xs text-red-500 mt-1">
+                  {lang === 'kh' ? 'ដល់ដែនកំណត់ហើយ' : 'Daily limit reached'}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Upgrade button */}
+          {plan === 'free' && (
+            <button
+              onClick={() => handleUpgrade('pro')}
+              disabled={upgrading}
+              className="w-full flex items-center justify-center gap-2 bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent py-2 rounded-xl text-xs font-semibold transition-colors"
+            >
+              <Zap size={12} />
+              {upgrading
+                ? 'Redirecting...'
+                : lang === 'kh'
+                ? 'ធ្វើឱ្យប្រសើរ → $4.99/ខែ'
+                : 'Upgrade to Pro · $4.99/mo'}
+            </button>
+          )}
+
+          {/* User info */}
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-sidebar-hover">
+            <div className="w-7 h-7 rounded-full bg-accent/15 flex items-center justify-center text-accent flex-shrink-0">
+              {planIcon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-gray-900 truncate">{userEmail}</p>
+              <p className={`text-xs ${planDetails.badge} rounded px-1 py-0.5 inline-block mt-0.5`}>
+                {planDetails.name}
+              </p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-gray-400 hover:text-gray-700 p-1 rounded hover:bg-gray-200 transition-colors"
+              title="Sign out"
+            >
+              <LogOut size={14} />
             </button>
           </div>
-        ))}
-      </div>
-
-      {/* Usage & Upgrade */}
-      <div className="px-3 py-3 border-t border-white/10 space-y-3">
-        {/* Usage bar */}
-        {dailyLimit !== Infinity && remaining !== null && (
-          <div>
-            <div className="flex justify-between text-xs text-gray-400 mb-1.5">
-              <span>{lang === 'kh' ? 'សារថ្ងៃនេះ' : 'Messages today'}</span>
-              <span>
-                {dailyLimit - remaining}/{dailyLimit}
-              </span>
-            </div>
-            <div className="h-1 bg-sidebar-hover rounded-full overflow-hidden">
-              <div
-                className="h-full bg-accent rounded-full transition-all"
-                style={{ width: `${((dailyLimit - remaining) / dailyLimit) * 100}%` }}
-              />
-            </div>
-            {remaining <= 5 && remaining > 0 && (
-              <p className="text-xs text-yellow-400 mt-1">
-                {lang === 'kh'
-                  ? `នៅសល់ ${remaining} សារ`
-                  : `${remaining} messages left today`}
-              </p>
-            )}
-            {remaining === 0 && (
-              <p className="text-xs text-red-400 mt-1">
-                {lang === 'kh' ? 'ដល់ដែនកំណត់ហើយ' : 'Daily limit reached'}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Upgrade button for free users */}
-        {plan === 'free' && (
-          <button
-            onClick={() => handleUpgrade('pro')}
-            disabled={upgrading}
-            className="w-full flex items-center justify-center gap-2 bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent py-2 rounded-xl text-xs font-semibold transition-colors"
-          >
-            <Zap size={12} />
-            {upgrading
-              ? 'Redirecting...'
-              : lang === 'kh'
-              ? 'ធ្វើឱ្យប្រសើរ → $4.99/ខែ'
-              : 'Upgrade to Pro · $4.99/mo'}
-          </button>
-        )}
-
-        {/* Plan badge */}
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-sidebar-hover">
-          <div className="w-7 h-7 rounded-full bg-accent/20 flex items-center justify-center text-accent flex-shrink-0">
-            {planIcon}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-white truncate">{userEmail}</p>
-            <p className={`text-xs ${planDetails.badge} rounded px-1 py-0.5 inline-block mt-0.5`}>
-              {planDetails.name}
-            </p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="text-gray-500 hover:text-white p-1 rounded hover:bg-white/10 transition-colors"
-            title="Sign out"
-          >
-            <LogOut size={14} />
-          </button>
         </div>
       </div>
-    </div>
     </>
   )
 }

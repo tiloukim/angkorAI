@@ -90,11 +90,11 @@ export default function MessageItem({ message, lang, token }: Props) {
               <img
                 src={message.image}
                 alt="attachment"
-                className="max-h-48 max-w-xs rounded-xl border border-white/10 object-cover"
+                className="max-h-48 max-w-xs rounded-xl border border-gray-200 object-cover"
               />
             )}
             {message.content && (
-              <div className="bg-user-bubble rounded-2xl px-4 py-3 text-white text-sm leading-relaxed">
+              <div className="bg-user-bubble rounded-2xl px-4 py-3 text-gray-800 text-sm leading-relaxed border border-gray-200">
                 <p className={lang === 'kh' ? 'font-khmer' : ''}>{message.content}</p>
               </div>
             )}
@@ -131,7 +131,7 @@ export default function MessageItem({ message, lang, token }: Props) {
                 onClick={toggleSpeak}
                 disabled={loading}
                 className={`mt-1.5 flex items-center gap-1 text-xs transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-40 ${
-                  speaking ? 'text-accent' : 'text-gray-500 hover:text-gray-300'
+                  speaking ? 'text-accent' : 'text-gray-400 hover:text-gray-600'
                 }`}
                 title={speaking ? 'Stop' : 'Read aloud'}
               >

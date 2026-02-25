@@ -59,12 +59,12 @@ export default function ChatMain({
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
         <div className="flex items-center gap-2">
           {!sidebarOpen && (
             <button
               onClick={onToggleSidebar}
-              className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
+              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
             >
               <PanelLeft size={18} />
             </button>
@@ -74,13 +74,13 @@ export default function ChatMain({
             <div className="relative">
               <button
                 onClick={() => setModelOpen(!modelOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sidebar hover:bg-sidebar-hover text-gray-300 hover:text-white text-xs font-medium transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 text-xs font-medium transition-colors"
               >
                 <span>{MODELS.find((m) => m.id === selectedModel)?.label ?? 'Model'}</span>
                 <ChevronDown size={12} />
               </button>
               {modelOpen && (
-                <div className="absolute left-0 top-full mt-1 w-52 bg-sidebar border border-white/10 rounded-xl shadow-xl z-50 overflow-hidden">
+                <div className="absolute left-0 top-full mt-1 w-52 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
                   {MODELS.map((m) => (
                     <button
                       key={m.id}
@@ -88,14 +88,14 @@ export default function ChatMain({
                       onClick={() => { if (!m.soon) { onSelectModel(m.id); setModelOpen(false) } }}
                       className={`w-full text-left px-4 py-2.5 text-xs transition-colors flex items-center justify-between ${
                         m.soon
-                          ? 'opacity-50 cursor-not-allowed text-gray-500'
+                          ? 'opacity-50 cursor-not-allowed text-gray-400'
                           : selectedModel === m.id
-                          ? 'text-white hover:bg-sidebar-hover'
-                          : 'text-gray-400 hover:bg-sidebar-hover'
+                          ? 'text-gray-900 bg-gray-50 hover:bg-gray-100'
+                          : 'text-gray-600 hover:bg-gray-50'
                       }`}
                     >
                       <span className="font-medium">{m.label}</span>
-                      <span className={m.soon ? 'text-accent text-[10px]' : 'text-gray-600'}>
+                      <span className={m.soon ? 'text-accent text-[10px]' : 'text-gray-400'}>
                         {m.soon ? 'Soon' : m.desc}
                       </span>
                     </button>
@@ -104,14 +104,14 @@ export default function ChatMain({
               )}
             </div>
           ) : (
-            <span className="text-sm font-medium text-gray-300">AngkorAI</span>
+            <span className="text-sm font-medium text-gray-700">AngkorAI</span>
           )}
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={onToggleLang}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sidebar hover:bg-sidebar-hover text-gray-300 hover:text-white text-xs font-medium transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 text-xs font-medium transition-colors"
           >
             <Globe size={13} />
             {lang === 'en' ? <span>ខ្មែរ</span> : <span>English</span>}
@@ -139,11 +139,11 @@ export default function ChatMain({
       )}
 
       {/* Input area */}
-      <div className="px-3 pt-2 pb-4 border-t border-white/5 bg-main">
+      <div className="px-3 pt-2 pb-4 border-t border-gray-200 bg-white">
         <div className="max-w-3xl mx-auto">
           {/* Prompt label — only on empty screen, mobile only */}
           {isEmpty && !isLimitReached && (
-            <p className="text-center text-gray-500 text-xs mb-2 sm:hidden">
+            <p className="text-center text-gray-400 text-xs mb-2 sm:hidden">
               {lang === 'kh' ? '👇 វាយសំណួររបស់អ្នកនៅខាងក្រោម' : '👇 Type your question below'}
             </p>
           )}
@@ -154,7 +154,7 @@ export default function ChatMain({
             lang={lang}
             plan={plan}
           />
-          <p className="text-center text-gray-600 text-[11px] mt-1.5">
+          <p className="text-center text-gray-400 text-[11px] mt-1.5">
             {lang === 'kh'
               ? 'AngkorAI អាចធ្វើខុស។ ត្រូវពិនិត្យព័ត៌មានសំខាន់ៗ។'
               : 'AngkorAI can make mistakes. Check important info.'}
@@ -193,12 +193,12 @@ function EmptyState({
     <div className="flex flex-col items-center px-4 pt-10 pb-4 h-full">
       {/* Branding */}
       <div className="mb-3">
-        <Image src="/logo.png" alt="AngkorAI" width={72} height={72} className="rounded-2xl shadow-lg" />
+        <Image src="/logo.png" alt="AngkorAI" width={72} height={72} className="rounded-2xl shadow-sm" />
       </div>
-      <h2 className={`text-2xl font-bold text-white mb-1 ${lang === 'kh' ? 'font-khmer' : ''}`}>
+      <h2 className={`text-2xl font-bold text-gray-900 mb-1 ${lang === 'kh' ? 'font-khmer' : ''}`}>
         {lang === 'kh' ? 'ខ្ញុំជួយអ្វីបានខ្លះ?' : 'How can I help you?'}
       </h2>
-      <p className={`text-gray-400 text-sm mb-6 ${lang === 'kh' ? 'font-khmer' : ''}`}>
+      <p className={`text-gray-500 text-sm mb-6 ${lang === 'kh' ? 'font-khmer' : ''}`}>
         {lang === 'kh' ? 'សួរអ្វីក៏បានជាភាសាខ្មែរ ឬអង់គ្លេស' : 'Ask anything in Khmer or English'}
       </p>
 
@@ -215,14 +215,14 @@ function EmptyState({
           <button
             key={text}
             onClick={() => onSend(text)}
-            className={`flex flex-col items-start gap-2 px-3 py-3 rounded-2xl bg-sidebar border border-white/10 active:bg-sidebar-hover hover:bg-sidebar-hover hover:border-white/20 transition-all text-left ${
+            className={`flex flex-col items-start gap-2 px-3 py-3 rounded-2xl bg-white border border-gray-200 active:bg-gray-50 hover:bg-gray-50 hover:border-gray-300 shadow-sm transition-all text-left ${
               lang === 'kh' ? 'font-khmer' : ''
             }`}
           >
-            <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
               <Icon size={14} className="text-accent" />
             </div>
-            <span className="text-xs text-gray-300 leading-snug">{text}</span>
+            <span className="text-xs text-gray-600 leading-snug">{text}</span>
           </button>
         ))}
       </div>

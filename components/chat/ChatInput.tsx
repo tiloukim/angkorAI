@@ -90,7 +90,7 @@ export default function ChatInput({ onSend, disabled, isStreaming, lang, plan }:
   const canSend = (value.trim().length > 0 || !!image) && !disabled
 
   return (
-    <div className="relative bg-sidebar border border-white/15 rounded-2xl hover:border-white/25 focus-within:border-accent/60 focus-within:shadow-[0_0_0_3px_rgba(var(--color-accent-rgb),0.12)] transition-all">
+    <div className="relative bg-white border border-gray-200 rounded-2xl hover:border-gray-300 focus-within:border-accent/60 focus-within:shadow-[0_0_0_3px_rgba(16,163,127,0.1)] shadow-sm transition-all">
       {/* Image preview */}
       {image && (
         <div className="px-4 pt-3">
@@ -115,7 +115,7 @@ export default function ChatInput({ onSend, disabled, isStreaming, lang, plan }:
         disabled={disabled}
         placeholder={placeholder}
         rows={1}
-        className={`w-full bg-transparent text-white placeholder-gray-400 resize-none focus:outline-none leading-relaxed px-4 pt-4 pb-14 ${
+        className={`w-full bg-transparent text-gray-900 placeholder-gray-400 resize-none focus:outline-none leading-relaxed px-4 pt-4 pb-14 ${
           lang === 'kh' ? 'font-khmer text-base' : 'text-[16px]'
         }`}
         style={{ minHeight: '80px', maxHeight: '240px' }}
@@ -135,7 +135,7 @@ export default function ChatInput({ onSend, disabled, isStreaming, lang, plan }:
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={disabled}
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all disabled:opacity-40"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all disabled:opacity-40"
               title="Attach image"
             >
               <ImagePlus size={16} />
@@ -150,8 +150,8 @@ export default function ChatInput({ onSend, disabled, isStreaming, lang, plan }:
             disabled={disabled}
             className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all disabled:opacity-40 ${
               listening
-                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                ? 'bg-red-100 text-red-500 hover:bg-red-200'
+                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
             }`}
             title={listening ? 'Stop recording' : 'Voice input'}
           >
@@ -166,7 +166,7 @@ export default function ChatInput({ onSend, disabled, isStreaming, lang, plan }:
           className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
             canSend
               ? 'bg-accent hover:bg-accent-hover text-white shadow-md'
-              : 'bg-white/5 text-gray-600 cursor-not-allowed'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
           }`}
           aria-label="Send message"
         >

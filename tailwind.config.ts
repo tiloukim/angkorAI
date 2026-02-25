@@ -9,12 +9,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        sidebar: '#171717',
-        'sidebar-hover': '#2a2a2a',
-        main: '#212121',
-        'user-bubble': '#2f2f2f',
+        sidebar: '#f9f9f7',
+        'sidebar-hover': '#efefed',
+        main: '#ffffff',
+        'user-bubble': '#f0f0ec',
         accent: '#10a37f',
         'accent-hover': '#0d8c6d',
+        'text-main': '#1a1a1a',
+        'text-sub': '#6b7280',
       },
       fontFamily: {
         khmer: ['"Noto Sans Khmer"', 'sans-serif'],
