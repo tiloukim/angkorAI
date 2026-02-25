@@ -7,18 +7,30 @@ export interface NewsItem {
 }
 
 const FEEDS = [
-  // Khmer language
+  // ── Khmer-language Cambodia ──────────────────────────────────────
   { name: 'RFA Khmer',          url: 'https://www.rfa.org/khmer/rss2.xml' },
   { name: 'VOD Khmer',          url: 'https://vodkhmer.news/feed/' },
   { name: 'Thmey Thmey',        url: 'https://thmeythmey.com/?feed=rss2' },
   { name: 'Dap News',           url: 'https://dap-news.com/feed/' },
-  { name: 'Fresh News',         url: 'https://freshnewsasia.com/feed/' },
-  // English language
+  { name: 'Fresh News KH',      url: 'https://freshnews.com.kh/feed/' },
+
+  // ── English-language Cambodia ────────────────────────────────────
   { name: 'Khmer Times',        url: 'https://www.khmertimeskh.com/feed/' },
   { name: 'Phnom Penh Post',    url: 'https://www.phnompenhpost.com/rss.xml' },
   { name: 'Cambodianess',       url: 'https://cambodianess.com/feed/' },
+  { name: 'Khmer Post Asia',    url: 'https://en.khmerpostasia.com/feed/' },
+  { name: 'Cambodia Post',      url: 'https://cambodiapost.com.kh/feed/' },
+  { name: 'Khmer Post USA',     url: 'https://khmerpostusa.com/feed/' },
   { name: 'Cambodia Investment Review', url: 'https://cambodiainvestmentreview.com/feed/' },
   { name: 'The Mirror',         url: 'https://cambodiamirror.wordpress.com/feed/' },
+
+  // ── International (Cambodia coverage) ────────────────────────────
+  { name: 'Al Jazeera',         url: 'https://www.aljazeera.com/xml/rss/all.xml' },
+  { name: 'The Diplomat',       url: 'https://thediplomat.com/countries/cambodia/feed/' },
+  { name: 'BBC News',           url: 'https://feeds.bbci.co.uk/news/topics/c8nq32jwj8mt.rss' },
+  { name: 'Reuters',            url: 'https://feeds.reuters.com/reuters/topNews' },
+  { name: 'CNN',                url: 'https://rss.cnn.com/rss/edition_world.rss' },
+  { name: 'ABC News',           url: 'https://feeds.abcnews.com/abcnews/internationalheadlines' },
 ]
 
 function extractCDATA(tag: string, xml: string): string {
@@ -60,7 +72,7 @@ export async function fetchCambodiaNews(): Promise<NewsItem[]> {
   for (const r of results) {
     if (r.status === 'fulfilled') all.push(...r.value)
   }
-  return all.slice(0, 20)
+  return all.slice(0, 30)
 }
 
 // Detect if user is asking about current news/events
@@ -96,5 +108,5 @@ export function formatNewsContext(items: NewsItem[]): string {
       }`
   )
 
-  return `\n\n[LIVE CAMBODIA NEWS — fetched ${today}]\n${lines.join('\n')}\n\nWhen answering about current news, cite the source name (e.g. "According to Khmer Times..."). If the user asks in Khmer, summarize the news in Khmer first then English.`
+  return `\n\n[LIVE NEWS — fetched ${today} | Sources: Cambodia + International]\n${lines.join('\n')}\n\nWhen answering about current news, always cite the source (e.g. "According to Reuters..." or "Khmer Times reports..."). Prioritize Cambodia-specific sources for local questions. If the user asks in Khmer, answer in Khmer first then English.`
 }
