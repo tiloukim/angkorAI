@@ -131,7 +131,7 @@ export default function ChatMain({
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto">
         {messages.length === 0 ? (
-          <EmptyState lang={lang} onSend={onSend} plan={plan} />
+          <EmptyState lang={lang} />
         ) : (
           <div className="max-w-3xl mx-auto px-4 py-6 space-y-1">
             {messages.map((msg) => (
@@ -147,9 +147,13 @@ export default function ChatMain({
         <LimitBanner plan={plan} dailyLimit={dailyLimit} lang={lang} />
       )}
 
-      {/* Input */}
-      <div className="px-4 py-4 pb-safe">
+      {/* Input + suggestions */}
+      <div className="px-4 pt-2 pb-4 pb-safe">
         <div className="max-w-3xl mx-auto">
+          {/* Suggestion chips — shown above input when no messages */}
+          {messages.length === 0 && !isLimitReached && (
+            <Suggestions lang={lang} plan={plan} onSend={onSend} />
+          )}
           <ChatInput
             onSend={onSend}
             disabled={isStreaming || isLimitReached}
@@ -168,14 +172,32 @@ export default function ChatMain({
   )
 }
 
-function EmptyState({
+function EmptyState({ lang }: { lang: 'en' | 'kh' }) {
+  return (
+    <div className="flex flex-col items-center justify-center px-4 pt-12 pb-4">
+      <div className="mb-4">
+        <Image src="/logo.png" alt="AngkorAI" width={64} height={64} className="rounded-2xl" />
+      </div>
+      <h2 className="text-xl font-bold text-white mb-1">
+        {lang === 'kh' ? 'ខ្ញុំជួយអ្វីបានខ្លះ?' : 'How can I help you?'}
+      </h2>
+      <p className="text-gray-500 text-sm">
+        {lang === 'kh'
+          ? 'សួរអ្វីក៏បានជាភាសាខ្មែរ ឬអង់គ្លេស'
+          : 'Ask anything in Khmer or English'}
+      </p>
+    </div>
+  )
+}
+
+function Suggestions({
   lang,
-  onSend,
   plan,
+  onSend,
 }: {
   lang: 'en' | 'kh'
-  onSend: (s: string, image?: string) => void
   plan: Plan
+  onSend: (s: string) => void
 }) {
   const suggestions =
     lang === 'kh'
@@ -188,32 +210,35 @@ function EmptyState({
       : [
           'Help me write a business email',
           'Explain how to build credit in Cambodia',
-          'What are the best jobs for young people in Phnom Penh?',
-          'Translate this from Khmer to English',
+          'Best jobs for young people in Phnom Penh?',
+          'Translate Khmer to English',
         ]
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-4 py-16">
-      <div className="mb-6">
-        <Image src="/logo.png" alt="AngkorAI" width={80} height={80} />
-      </div>
-      <h2 className="text-2xl font-bold mb-2 text-white">
-        {lang === 'kh' ? 'ខ្ញុំជួយអ្វីបានខ្លះ?' : 'How can I help you?'}
-      </h2>
-      <p className="text-gray-400 text-sm mb-8">
-        {lang === 'kh'
-          ? 'សួរអ្វីក៏បានជាភាសាខ្មែរ ឬអង់គ្លេស'
-          : 'Ask anything in Khmer or English'}
-      </p>
-
+    <div className="mb-3">
       {plan === 'free' && (
-        <div className="flex items-center gap-1.5 bg-accent/10 border border-accent/20 rounded-full px-4 py-1.5 text-xs text-accent mb-6">
-          <Zap size={12} />
-          {lang === 'kh' ? 'ផែនការឥតគិតថ្លៃ · ៣០ សារ/ថ្ងៃ' : 'Free plan · 30 messages/day'}
+        <div className="flex items-center justify-center gap-1.5 mb-3">
+          <div className="flex items-center gap-1.5 bg-accent/10 border border-accent/20 rounded-full px-3 py-1 text-xs text-accent">
+            <Zap size={11} />
+            {lang === 'kh' ? 'ផែនការឥតគិតថ្លៃ · ៣០ សារ/ថ្ងៃ' : 'Free plan · 30 messages/day'}
+          </div>
         </div>
       )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl w-full">
+      {/* Horizontal scroll on mobile, 2-col grid on desktop */}
+      <div className="flex gap-2 overflow-x-auto pb-1 sm:hidden scrollbar-none">
+        {suggestions.map((s) => (
+          <button
+            key={s}
+            onClick={() => onSend(s)}
+            className={`flex-shrink-0 text-left px-3 py-2 rounded-xl bg-sidebar border border-white/10 text-xs text-gray-300 hover:text-white hover:border-white/20 transition-all max-w-[200px] ${
+              lang === 'kh' ? 'font-khmer' : ''
+            }`}
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+      <div className="hidden sm:grid sm:grid-cols-2 gap-2">
         {suggestions.map((s) => (
           <button
             key={s}

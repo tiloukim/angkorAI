@@ -85,8 +85,8 @@ export default function ChatInput({ onSend, disabled, isStreaming, lang, plan }:
   const isPro = plan !== 'free'
   const placeholder =
     lang === 'kh'
-      ? 'សរសេរសាររបស់អ្នក... (Enter ដើម្បីផ្ញើ)'
-      : 'Message AngkorAI... (Enter to send)'
+      ? 'សរសេរសំណួររបស់អ្នក...'
+      : 'Ask AngkorAI anything...'
   const canSend = (value.trim().length > 0 || !!image) && !disabled
 
   return (
