@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react'
 import Image from 'next/image'
-import { PanelLeft, Globe, Zap, ChevronDown } from 'lucide-react'
+import { PanelLeft, Globe, Zap, ChevronDown, Mail, CreditCard, Briefcase, Languages } from 'lucide-react'
 import MessageItem from './MessageItem'
 import ChatInput from './ChatInput'
 import type { Message } from './ChatLayout'
@@ -54,6 +54,7 @@ export default function ChatMain({
   }, [messages])
 
   const isLimitReached = remaining !== null && remaining === 0
+  const isEmpty = messages.length === 0
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
@@ -69,13 +70,11 @@ export default function ChatMain({
             </button>
           )}
 
-          {/* Model selector — Pro only; free users locked to Angkor LLM */}
           {plan !== 'free' ? (
             <div className="relative">
               <button
                 onClick={() => setModelOpen(!modelOpen)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sidebar hover:bg-sidebar-hover text-gray-300 hover:text-white text-xs font-medium transition-colors"
-                title="Select AI model"
               >
                 <span>{MODELS.find((m) => m.id === selectedModel)?.label ?? 'Model'}</span>
                 <ChevronDown size={12} />
@@ -105,33 +104,25 @@ export default function ChatMain({
               )}
             </div>
           ) : (
-            <span className="text-sm font-medium text-gray-300">
-              Angkor LLM
-            </span>
+            <span className="text-sm font-medium text-gray-300">AngkorAI</span>
           )}
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Language toggle */}
           <button
             onClick={onToggleLang}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sidebar hover:bg-sidebar-hover text-gray-300 hover:text-white text-xs font-medium transition-colors"
-            title="Toggle language"
           >
             <Globe size={13} />
-            {lang === 'en' ? (
-              <span>ខ្មែរ</span>
-            ) : (
-              <span className="font-khmer">English</span>
-            )}
+            {lang === 'en' ? <span>ខ្មែរ</span> : <span>English</span>}
           </button>
         </div>
       </div>
 
-      {/* Messages area */}
+      {/* Messages / Empty state */}
       <div className="flex-1 overflow-y-auto">
-        {messages.length === 0 ? (
-          <EmptyState lang={lang} />
+        {isEmpty ? (
+          <EmptyState lang={lang} plan={plan} onSend={onSend} />
         ) : (
           <div className="max-w-3xl mx-auto px-4 py-6 space-y-1">
             {messages.map((msg) => (
@@ -142,17 +133,19 @@ export default function ChatMain({
         )}
       </div>
 
-      {/* Limit reached banner */}
+      {/* Limit banner */}
       {isLimitReached && (
         <LimitBanner plan={plan} dailyLimit={dailyLimit} lang={lang} />
       )}
 
-      {/* Input + suggestions */}
-      <div className="px-4 pt-2 pb-4 pb-safe">
+      {/* Input area */}
+      <div className="px-3 pt-2 pb-4 border-t border-white/5 bg-main">
         <div className="max-w-3xl mx-auto">
-          {/* Suggestion chips — shown above input when no messages */}
-          {messages.length === 0 && !isLimitReached && (
-            <Suggestions lang={lang} plan={plan} onSend={onSend} />
+          {/* Prompt label — only on empty screen, mobile only */}
+          {isEmpty && !isLimitReached && (
+            <p className="text-center text-gray-500 text-xs mb-2 sm:hidden">
+              {lang === 'kh' ? '👇 វាយសំណួររបស់អ្នកនៅខាងក្រោម' : '👇 Type your question below'}
+            </p>
           )}
           <ChatInput
             onSend={onSend}
@@ -161,7 +154,7 @@ export default function ChatMain({
             lang={lang}
             plan={plan}
           />
-          <p className="text-center text-gray-600 text-xs mt-2">
+          <p className="text-center text-gray-600 text-[11px] mt-1.5">
             {lang === 'kh'
               ? 'AngkorAI អាចធ្វើខុស។ ត្រូវពិនិត្យព័ត៌មានសំខាន់ៗ។'
               : 'AngkorAI can make mistakes. Check important info.'}
@@ -172,25 +165,7 @@ export default function ChatMain({
   )
 }
 
-function EmptyState({ lang }: { lang: 'en' | 'kh' }) {
-  return (
-    <div className="flex flex-col items-center justify-center px-4 pt-12 pb-4">
-      <div className="mb-4">
-        <Image src="/logo.png" alt="AngkorAI" width={64} height={64} className="rounded-2xl" />
-      </div>
-      <h2 className="text-xl font-bold text-white mb-1">
-        {lang === 'kh' ? 'ខ្ញុំជួយអ្វីបានខ្លះ?' : 'How can I help you?'}
-      </h2>
-      <p className="text-gray-500 text-sm">
-        {lang === 'kh'
-          ? 'សួរអ្វីក៏បានជាភាសាខ្មែរ ឬអង់គ្លេស'
-          : 'Ask anything in Khmer or English'}
-      </p>
-    </div>
-  )
-}
-
-function Suggestions({
+function EmptyState({
   lang,
   plan,
   onSend,
@@ -202,52 +177,52 @@ function Suggestions({
   const suggestions =
     lang === 'kh'
       ? [
-          'ជួយខ្ញុំសរសេរអ៊ីមែលស្នើសុំការងារ',
-          'ពន្យល់ពី AI ជូនខ្ញុំ',
-          'របៀបចាប់ផ្តើមអាជីវកម្មតូចៗ',
-          'គណនាការប្រាក់ប្រាក់កម្ចី',
+          { icon: Mail,      text: 'ជួយខ្ញុំសរសេរអ៊ីមែលការងារ' },
+          { icon: CreditCard, text: 'ពន្យល់ពី AI ជូនខ្ញុំ' },
+          { icon: Briefcase,  text: 'ចាប់ផ្តើមអាជីវកម្មតូចៗ' },
+          { icon: Languages,  text: 'បកប្រែពីខ្មែរទៅអង់គ្លេស' },
         ]
       : [
-          'Help me write a business email',
-          'Explain how to build credit in Cambodia',
-          'Best jobs for young people in Phnom Penh?',
-          'Translate Khmer to English',
+          { icon: Mail,       text: 'Help me write a business email' },
+          { icon: CreditCard, text: 'Build credit in Cambodia' },
+          { icon: Briefcase,  text: 'Best jobs for youth in Phnom Penh' },
+          { icon: Languages,  text: 'Translate Khmer to English' },
         ]
 
   return (
-    <div className="mb-3">
+    <div className="flex flex-col items-center px-4 pt-10 pb-4 h-full">
+      {/* Branding */}
+      <div className="mb-3">
+        <Image src="/logo.png" alt="AngkorAI" width={72} height={72} className="rounded-2xl shadow-lg" />
+      </div>
+      <h2 className={`text-2xl font-bold text-white mb-1 ${lang === 'kh' ? 'font-khmer' : ''}`}>
+        {lang === 'kh' ? 'ខ្ញុំជួយអ្វីបានខ្លះ?' : 'How can I help you?'}
+      </h2>
+      <p className={`text-gray-400 text-sm mb-6 ${lang === 'kh' ? 'font-khmer' : ''}`}>
+        {lang === 'kh' ? 'សួរអ្វីក៏បានជាភាសាខ្មែរ ឬអង់គ្លេស' : 'Ask anything in Khmer or English'}
+      </p>
+
       {plan === 'free' && (
-        <div className="flex items-center justify-center gap-1.5 mb-3">
-          <div className="flex items-center gap-1.5 bg-accent/10 border border-accent/20 rounded-full px-3 py-1 text-xs text-accent">
-            <Zap size={11} />
-            {lang === 'kh' ? 'ផែនការឥតគិតថ្លៃ · ៣០ សារ/ថ្ងៃ' : 'Free plan · 30 messages/day'}
-          </div>
+        <div className="flex items-center gap-1.5 bg-accent/10 border border-accent/20 rounded-full px-3 py-1 text-xs text-accent mb-5">
+          <Zap size={11} />
+          {lang === 'kh' ? 'ផែនការឥតគិតថ្លៃ · ៣០ សារ/ថ្ងៃ' : 'Free plan · 30 messages/day'}
         </div>
       )}
-      {/* Horizontal scroll on mobile, 2-col grid on desktop */}
-      <div className="flex gap-2 overflow-x-auto pb-1 sm:hidden scrollbar-none">
-        {suggestions.map((s) => (
+
+      {/* Suggestion cards — 2 col grid */}
+      <div className="grid grid-cols-2 gap-2.5 w-full max-w-sm">
+        {suggestions.map(({ icon: Icon, text }) => (
           <button
-            key={s}
-            onClick={() => onSend(s)}
-            className={`flex-shrink-0 text-left px-3 py-2 rounded-xl bg-sidebar border border-white/10 text-xs text-gray-300 hover:text-white hover:border-white/20 transition-all max-w-[200px] ${
+            key={text}
+            onClick={() => onSend(text)}
+            className={`flex flex-col items-start gap-2 px-3 py-3 rounded-2xl bg-sidebar border border-white/10 active:bg-sidebar-hover hover:bg-sidebar-hover hover:border-white/20 transition-all text-left ${
               lang === 'kh' ? 'font-khmer' : ''
             }`}
           >
-            {s}
-          </button>
-        ))}
-      </div>
-      <div className="hidden sm:grid sm:grid-cols-2 gap-2">
-        {suggestions.map((s) => (
-          <button
-            key={s}
-            onClick={() => onSend(s)}
-            className={`text-left px-4 py-3 rounded-2xl bg-sidebar hover:bg-sidebar-hover border border-white/10 hover:border-white/20 text-sm text-gray-300 hover:text-white transition-all ${
-              lang === 'kh' ? 'font-khmer' : ''
-            }`}
-          >
-            {s}
+            <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
+              <Icon size={14} className="text-accent" />
+            </div>
+            <span className="text-xs text-gray-300 leading-snug">{text}</span>
           </button>
         ))}
       </div>
@@ -267,9 +242,7 @@ function LimitBanner({
   async function upgrade() {
     const res = await fetch('/api/checkout', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ plan: 'pro' }),
     })
     const data = await res.json()
@@ -277,7 +250,7 @@ function LimitBanner({
   }
 
   return (
-    <div className="mx-4 mb-2 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl px-4 py-3 flex items-center justify-between gap-4">
+    <div className="mx-3 mb-2 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl px-4 py-3 flex items-center justify-between gap-4">
       <div>
         <p className="text-yellow-400 text-sm font-semibold">
           {lang === 'kh' ? 'ដល់ដែនកំណត់ប្រចាំថ្ងៃ' : 'Daily limit reached'}

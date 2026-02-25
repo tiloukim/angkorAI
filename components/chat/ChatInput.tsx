@@ -90,7 +90,7 @@ export default function ChatInput({ onSend, disabled, isStreaming, lang, plan }:
   const canSend = (value.trim().length > 0 || !!image) && !disabled
 
   return (
-    <div className="relative bg-sidebar border border-white/10 rounded-2xl hover:border-white/20 focus-within:border-accent/50 transition-colors">
+    <div className="relative bg-sidebar border border-white/15 rounded-2xl hover:border-white/25 focus-within:border-accent/60 focus-within:shadow-[0_0_0_3px_rgba(var(--color-accent-rgb),0.12)] transition-all">
       {/* Image preview */}
       {image && (
         <div className="px-4 pt-3">
@@ -115,10 +115,10 @@ export default function ChatInput({ onSend, disabled, isStreaming, lang, plan }:
         disabled={disabled}
         placeholder={placeholder}
         rows={1}
-        className={`w-full bg-transparent text-white placeholder-gray-500 text-sm px-4 py-3.5 resize-none focus:outline-none leading-relaxed ${
-          isPro ? 'pr-28' : 'pr-12'
-        } ${lang === 'kh' ? 'font-khmer' : ''}`}
-        style={{ minHeight: '52px', maxHeight: '200px' }}
+        className={`w-full bg-transparent text-white placeholder-gray-400 resize-none focus:outline-none leading-relaxed px-4 pt-4 pb-14 ${
+          lang === 'kh' ? 'font-khmer text-base' : 'text-[16px]'
+        }`}
+        style={{ minHeight: '80px', maxHeight: '240px' }}
       />
 
       <div className="absolute right-3 bottom-3 flex items-center gap-1.5">
@@ -135,27 +135,27 @@ export default function ChatInput({ onSend, disabled, isStreaming, lang, plan }:
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={disabled}
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all disabled:opacity-40"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all disabled:opacity-40"
               title="Attach image"
             >
-              <ImagePlus size={15} />
+              <ImagePlus size={16} />
             </button>
           </>
         )}
 
-        {/* Pro-only: Mic */}
+        {/* Mic — Pro only */}
         {isPro && (
           <button
             onClick={toggleMic}
             disabled={disabled}
-            className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all disabled:opacity-40 ${
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all disabled:opacity-40 ${
               listening
                 ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
                 : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
             }`}
             title={listening ? 'Stop recording' : 'Voice input'}
           >
-            {listening ? <MicOff size={15} /> : <Mic size={15} />}
+            {listening ? <MicOff size={16} /> : <Mic size={16} />}
           </button>
         )}
 
@@ -163,17 +163,17 @@ export default function ChatInput({ onSend, disabled, isStreaming, lang, plan }:
         <button
           onClick={handleSubmit}
           disabled={!canSend}
-          className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+          className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
             canSend
-              ? 'bg-accent hover:bg-accent-hover text-white'
-              : 'bg-sidebar-hover text-gray-500 cursor-not-allowed'
+              ? 'bg-accent hover:bg-accent-hover text-white shadow-md'
+              : 'bg-white/5 text-gray-600 cursor-not-allowed'
           }`}
           aria-label="Send message"
         >
           {isStreaming ? (
-            <Loader2 size={15} className="animate-spin" />
+            <Loader2 size={16} className="animate-spin" />
           ) : (
-            <ArrowUp size={15} />
+            <ArrowUp size={16} />
           )}
         </button>
       </div>
