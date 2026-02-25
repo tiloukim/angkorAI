@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import Groq from 'groq-sdk'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { PLAN_LIMITS } from '@/lib/plans'
+import { isNewsQuery, fetchCambodiaNews, formatNewsContext } from '@/lib/news'
 
 const DEFAULT_MODEL = process.env.AI_MODEL || "llama-3.3-70b-versatile"
 
@@ -128,9 +129,20 @@ export async function POST(req: NextRequest) {
         : String(m.content),
     }))
 
-    const systemContent = hasImage
+    // Detect news queries and inject live headlines
+    const lastUserText = flatMessages.filter((m: { role: string; content: string }) => m.role === 'user').pop()?.content ?? ''
+    let systemContent = hasImage
       ? SYSTEM_PROMPT + '\n\n[The user attached an image to this message. Acknowledge it and respond to any text they wrote.]'
       : SYSTEM_PROMPT
+
+    if (isNewsQuery(lastUserText)) {
+      try {
+        const newsItems = await fetchCambodiaNews()
+        systemContent += formatNewsContext(newsItems)
+      } catch {
+        // If news fetch fails, continue without it
+      }
+    }
 
     // Stream response from Groq
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
