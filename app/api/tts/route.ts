@@ -5,12 +5,9 @@ const GOOGLE_TTS_KEY = process.env.GOOGLE_TTS_API_KEY
 
 export async function POST(req: NextRequest) {
   try {
-    // Auth check
-    const authHeader = req.headers.get('authorization')
-    if (!authHeader) return new Response('Unauthorized', { status: 401 })
-    const token = authHeader.replace('Bearer ', '')
+    // Auth check via cookies
     const supabase = await createServiceClient()
-    const { data: { user }, error } = await supabase.auth.getUser(token)
+    const { data: { user }, error } = await supabase.auth.getUser()
     if (error || !user) return new Response('Unauthorized', { status: 401 })
 
     if (!GOOGLE_TTS_KEY) {

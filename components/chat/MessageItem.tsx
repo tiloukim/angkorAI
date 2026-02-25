@@ -49,7 +49,6 @@ export default function MessageItem({ message, lang, token }: Props) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ text }),
       })

@@ -5,10 +5,7 @@ import { stripe } from '@/lib/stripe'
 export async function POST(req: NextRequest) {
   const supabase = await createServiceClient()
 
-  const token = req.headers.get('authorization')?.replace('Bearer ', '')
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: { user } } = await supabase.auth.getUser(token)
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { plan } = await req.json()

@@ -8,10 +8,7 @@ export async function GET(
   const { id } = await params
   const supabase = await createServiceClient()
 
-  const token = req.headers.get('authorization')?.replace('Bearer ', '')
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: { user } } = await supabase.auth.getUser(token)
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // Verify conversation belongs to user

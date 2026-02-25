@@ -144,7 +144,7 @@ export default function ChatMain({
 
       {/* Limit reached banner */}
       {isLimitReached && (
-        <LimitBanner plan={plan} dailyLimit={dailyLimit} lang={lang} token={token} />
+        <LimitBanner plan={plan} dailyLimit={dailyLimit} lang={lang} />
       )}
 
       {/* Input */}
@@ -234,18 +234,15 @@ function LimitBanner({
   plan,
   dailyLimit,
   lang,
-  token,
 }: {
   plan: Plan
   dailyLimit: number
   lang: 'en' | 'kh'
-  token: string
 }) {
   async function upgrade() {
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ plan: 'pro' }),

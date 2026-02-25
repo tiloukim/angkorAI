@@ -43,13 +43,8 @@ export async function POST(req: NextRequest) {
   try {
     const supabase = await createServiceClient()
 
-    // Verify auth
-    const authHeader = req.headers.get('authorization')
-    if (!authHeader) {
-      return new Response('Unauthorized', { status: 401 })
-    }
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    // Verify auth via cookies
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return new Response('Unauthorized', { status: 401 })
     }

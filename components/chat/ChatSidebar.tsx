@@ -73,7 +73,6 @@ export default function ChatSidebar({
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ plan: targetPlan }),
