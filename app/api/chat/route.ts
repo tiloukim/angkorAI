@@ -3,14 +3,11 @@ import Groq from 'groq-sdk'
 import { createServiceClient } from '@/lib/supabase/server'
 import { PLAN_LIMITS } from '@/lib/plans'
 
-const apiKey = process.env.GROQ_API_KEY;
 const DEFAULT_MODEL = process.env.AI_MODEL || "llama-3.3-70b-versatile"
 
 const ALLOWED_MODELS = new Set([
   'llama-3.3-70b-versatile',
 ])
-
-const groq = new Groq({ apiKey })
 
 const SYSTEM_PROMPT = `You are AngkorAI, Cambodia's first bilingual AI assistant. You speak both Khmer (ភាសាខ្មែរ) and English fluently.
 
@@ -144,6 +141,7 @@ export async function POST(req: NextRequest) {
       : SYSTEM_PROMPT
 
     // Stream response from Groq
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
     const stream = await groq.chat.completions.create({
       model,
       max_tokens: 4096,
