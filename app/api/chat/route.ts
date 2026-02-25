@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import Groq from 'groq-sdk'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { PLAN_LIMITS } from '@/lib/plans'
 
 const DEFAULT_MODEL = process.env.AI_MODEL || "llama-3.3-70b-versatile"
@@ -41,13 +41,10 @@ Always be respectful, accurate, and helpful. If you don't know something, say so
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createServiceClient()
+    const { data: { user } } = await (await createClient()).auth.getUser()
+    if (!user) return new Response('Unauthorized', { status: 401 })
 
-    // Verify auth via cookies
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return new Response('Unauthorized', { status: 401 })
-    }
+    const supabase = await createServiceClient()
 
     // Get user profile & plan
     const { data: profile } = await supabase

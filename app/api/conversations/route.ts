@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 // GET /api/conversations — list user conversations
 export async function GET(req: NextRequest) {
-  const supabase = await createServiceClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await (await createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const supabase = await createServiceClient()
 
   const { data, error } = await supabase
     .from('conversations')
@@ -21,10 +21,10 @@ export async function GET(req: NextRequest) {
 
 // POST /api/conversations — create new conversation
 export async function POST(req: NextRequest) {
-  const supabase = await createServiceClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await (await createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const supabase = await createServiceClient()
 
   const { title } = await req.json().catch(() => ({ title: 'New chat' }))
 
@@ -40,10 +40,10 @@ export async function POST(req: NextRequest) {
 
 // PATCH /api/conversations — update conversation title
 export async function PATCH(req: NextRequest) {
-  const supabase = await createServiceClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await (await createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const supabase = await createServiceClient()
 
   const { id, title } = await req.json()
 
@@ -59,10 +59,10 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE /api/conversations — delete a conversation
 export async function DELETE(req: NextRequest) {
-  const supabase = await createServiceClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await (await createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const supabase = await createServiceClient()
 
   const { searchParams } = new URL(req.url)
   const id = searchParams.get('id')

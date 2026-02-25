@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { PLAN_LIMITS } from '@/lib/plans'
 
 export async function GET(req: NextRequest) {
-  const supabase = await createServiceClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await (await createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const supabase = await createServiceClient()
   const { data: profile } = await supabase
     .from('profiles')
     .select('plan')

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
 
 export async function POST(req: NextRequest) {
-  const supabase = await createServiceClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await (await createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const supabase = await createServiceClient()
 
   const { plan } = await req.json()
   const priceId =

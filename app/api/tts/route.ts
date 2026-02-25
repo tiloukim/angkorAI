@@ -1,14 +1,12 @@
 import { NextRequest } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 const GOOGLE_TTS_KEY = process.env.GOOGLE_TTS_API_KEY
 
 export async function POST(req: NextRequest) {
   try {
-    // Auth check via cookies
-    const supabase = await createServiceClient()
-    const { data: { user }, error } = await supabase.auth.getUser()
-    if (error || !user) return new Response('Unauthorized', { status: 401 })
+    const { data: { user } } = await (await createClient()).auth.getUser()
+    if (!user) return new Response('Unauthorized', { status: 401 })
 
     if (!GOOGLE_TTS_KEY) {
       return new Response(

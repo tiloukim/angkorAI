@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const supabase = await createServiceClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await (await createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const supabase = await createServiceClient()
 
   // Verify conversation belongs to user
   const { data: conv } = await supabase
