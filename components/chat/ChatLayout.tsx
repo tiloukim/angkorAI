@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 function uid() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -40,6 +41,19 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
   const [messages, setMessages] = useState<Message[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
   const [usedToday, setUsedToday] = useState(0)
+  const [authToken, setAuthToken] = useState(token)
+
+  // Keep auth token fresh using browser Supabase client
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.access_token) setAuthToken(session.access_token)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthToken(session?.access_token ?? token)
+    })
+    return () => subscription.unsubscribe()
+  }, [authToken])
   // Default closed on mobile, open on desktop
   const [sidebarOpen, setSidebarOpen] = useState(
     typeof window !== 'undefined' ? window.innerWidth >= 768 : true
@@ -53,20 +67,20 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
   // Fetch conversations
   const fetchConversations = useCallback(async () => {
     const res = await fetch('/api/conversations', {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${authToken}` },
     })
     const data = await res.json()
     if (data.conversations) setConversations(data.conversations)
-  }, [token])
+  }, [authToken])
 
   // Fetch usage
   const fetchUsage = useCallback(async () => {
     const res = await fetch('/api/usage', {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${authToken}` },
     })
     const data = await res.json()
     if (data.used !== undefined) setUsedToday(data.used)
-  }, [token])
+  }, [authToken])
 
   useEffect(() => {
     fetchConversations()
@@ -84,7 +98,7 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
     setActiveConvId(convId)
     // Fetch messages for this conversation
     const res = await fetch(`/api/conversations/${convId}/messages`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${authToken}` },
     })
     if (res.ok) {
       const data = await res.json()
@@ -102,7 +116,7 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
   async function deleteConversation(convId: string) {
     await fetch(`/api/conversations?id=${convId}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${authToken}` },
     })
     if (activeConvId === convId) {
       setActiveConvId(null)
@@ -122,7 +136,7 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
       const res = await fetch('/api/conversations', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -156,7 +170,7 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -238,7 +252,7 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
         await fetch('/api/conversations', {
           method: 'PATCH',
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${authToken}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -277,7 +291,7 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
         planDetails={planDetails}
         remaining={remaining}
         dailyLimit={dailyLimit}
-        token={token}
+        token={authToken}
         lang={lang}
         onNewChat={newChat}
         onSelectConv={loadConversation}
@@ -292,7 +306,7 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
         dailyLimit={dailyLimit}
         lang={lang}
         sidebarOpen={sidebarOpen}
-        token={token}
+        token={authToken}
         selectedModel={selectedModel}
         onSend={sendMessage}
         onNewChat={newChat}
