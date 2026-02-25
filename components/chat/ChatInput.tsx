@@ -18,7 +18,8 @@ export default function ChatInput({ onSend, disabled, isStreaming, lang, plan }:
   const [image, setImage] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null)
 
   // Auto-resize textarea
   useEffect(() => {
