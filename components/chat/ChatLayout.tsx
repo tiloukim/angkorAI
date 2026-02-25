@@ -123,6 +123,9 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
         }),
       })
       const data = await res.json()
+      if (!res.ok || !data.conversation?.id) {
+        throw new Error(data.error || 'Failed to create conversation')
+      }
       convId = data.conversation.id
       setActiveConvId(convId)
       fetchConversations()

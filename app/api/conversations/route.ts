@@ -26,6 +26,12 @@ export async function POST(req: NextRequest) {
 
   const supabase = await createServiceClient()
 
+  // Ensure profile row exists (prevents FK constraint failure on conversations insert)
+  await supabase.from('profiles').upsert(
+    { id: user.id, email: user.email ?? '' },
+    { onConflict: 'id' }
+  )
+
   const { title } = await req.json().catch(() => ({ title: 'New chat' }))
 
   const { data, error } = await supabase
