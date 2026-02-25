@@ -11,8 +11,18 @@ export async function POST(req: NextRequest) {
   const { plan } = await req.json()
   const priceId =
     plan === 'pro'
-      ? process.env.STRIPE_PRO_PRICE_ID!
-      : process.env.STRIPE_BUSINESS_PRICE_ID!
+      ? process.env.STRIPE_PRO_PRICE_ID
+      : process.env.STRIPE_BUSINESS_PRICE_ID
+
+  if (!priceId) {
+    return NextResponse.json({ error: `Price ID for plan "${plan}" is not configured` }, { status: 500 })
+  }
+
+  // Ensure profile row exists
+  await supabase.from('profiles').upsert(
+    { id: user.id, email: user.email ?? '' },
+    { onConflict: 'id' }
+  )
 
   // Get or create Stripe customer
   const { data: profile } = await supabase

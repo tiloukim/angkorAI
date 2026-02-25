@@ -70,16 +70,23 @@ export default function ChatSidebar({
 
   async function handleUpgrade(targetPlan: 'pro' | 'business') {
     setUpgrading(true)
-    const res = await fetch('/api/checkout', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ plan: targetPlan }),
-    })
-    const data = await res.json()
-    if (data.url) window.location.href = data.url
-    else setUpgrading(false)
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: targetPlan }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert(data.error || 'Could not start checkout. Please try again.')
+        setUpgrading(false)
+      }
+    } catch {
+      alert('Checkout failed. Please try again.')
+      setUpgrading(false)
+    }
   }
 
   const planIcon =
