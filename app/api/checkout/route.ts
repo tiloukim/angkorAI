@@ -20,29 +20,16 @@ export async function POST(req: NextRequest) {
 
   // Ensure profile row exists
   await supabase.from('profiles').upsert(
-    { id: user.id, email: user.email ?? '' },
+    { id: user.id },
     { onConflict: 'id' }
   )
 
-  // Get or create Stripe customer
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('stripe_customer_id')
-    .eq('id', user.id)
-    .single()
-
-  let customerId = profile?.stripe_customer_id
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: user.email!,
-      metadata: { supabase_user_id: user.id },
-    })
-    customerId = customer.id
-    await supabase
-      .from('profiles')
-      .update({ stripe_customer_id: customerId })
-      .eq('id', user.id)
-  }
+  // Create a Stripe customer for this checkout session
+  const customer = await stripe.customers.create({
+    email: user.email!,
+    metadata: { supabase_user_id: user.id },
+  })
+  const customerId = customer.id
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 

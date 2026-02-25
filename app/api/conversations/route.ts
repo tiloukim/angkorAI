@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
   // Ensure profile row exists (prevents FK constraint failure on conversations insert)
   await supabase.from('profiles').upsert(
-    { id: user.id, email: user.email ?? '' },
+    { id: user.id },
     { onConflict: 'id' }
   )
 
