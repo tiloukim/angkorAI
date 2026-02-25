@@ -7,10 +7,18 @@ export interface NewsItem {
 }
 
 const FEEDS = [
-  { name: 'RFA Khmer',        url: 'https://www.rfa.org/khmer/rss2.xml' },
-  { name: 'VOD Khmer',        url: 'https://vodkhmer.news/feed/' },
-  { name: 'Khmer Times',      url: 'https://www.khmertimeskh.com/feed/' },
-  { name: 'Phnom Penh Post',  url: 'https://www.phnompenhpost.com/rss.xml' },
+  // Khmer language
+  { name: 'RFA Khmer',          url: 'https://www.rfa.org/khmer/rss2.xml' },
+  { name: 'VOD Khmer',          url: 'https://vodkhmer.news/feed/' },
+  { name: 'Thmey Thmey',        url: 'https://thmeythmey.com/?feed=rss2' },
+  { name: 'Dap News',           url: 'https://dap-news.com/feed/' },
+  { name: 'Fresh News',         url: 'https://freshnewsasia.com/feed/' },
+  // English language
+  { name: 'Khmer Times',        url: 'https://www.khmertimeskh.com/feed/' },
+  { name: 'Phnom Penh Post',    url: 'https://www.phnompenhpost.com/rss.xml' },
+  { name: 'Cambodianess',       url: 'https://cambodianess.com/feed/' },
+  { name: 'Cambodia Investment Review', url: 'https://cambodiainvestmentreview.com/feed/' },
+  { name: 'The Mirror',         url: 'https://cambodiamirror.wordpress.com/feed/' },
 ]
 
 function extractCDATA(tag: string, xml: string): string {
@@ -24,7 +32,7 @@ function parseRSS(xml: string, sourceName: string): NewsItem[] {
   const items: NewsItem[] = []
   const blocks = xml.match(/<item[\s\S]*?<\/item>/g) ?? []
 
-  for (const block of blocks.slice(0, 5)) {
+  for (const block of blocks.slice(0, 4)) {
     const title = extractCDATA('title', block)
     const description = extractCDATA('description', block).slice(0, 300)
     const link = extractCDATA('link', block) || block.match(/<link\s*\/?>(.*?)<\/link>/)?.[1]?.trim() || ''
@@ -52,7 +60,7 @@ export async function fetchCambodiaNews(): Promise<NewsItem[]> {
   for (const r of results) {
     if (r.status === 'fulfilled') all.push(...r.value)
   }
-  return all.slice(0, 12)
+  return all.slice(0, 20)
 }
 
 // Detect if user is asking about current news/events
