@@ -13,7 +13,9 @@ import {
   Zap,
   Crown,
   Sparkles,
+  Settings,
 } from 'lucide-react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import type { Conversation } from './ChatLayout'
 import type { Plan } from '@/lib/plans'
@@ -236,6 +238,13 @@ export default function ChatSidebar({
                 {planDetails.name}
               </p>
             </div>
+            <Link
+              href="/settings"
+              className="text-gray-400 hover:text-gray-700 p-1 rounded hover:bg-gray-200 transition-colors"
+              title="Settings"
+            >
+              <Settings size={14} />
+            </Link>
             <button
               onClick={handleLogout}
               className="text-gray-400 hover:text-gray-700 p-1 rounded hover:bg-gray-200 transition-colors"
