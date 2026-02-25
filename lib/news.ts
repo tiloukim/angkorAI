@@ -75,6 +75,77 @@ export async function fetchCambodiaNews(): Promise<NewsItem[]> {
   return all.slice(0, 30)
 }
 
+// ─── Time ────────────────────────────────────────────────────────────────────
+
+export function getCambodiaTime(): string {
+  return new Date().toLocaleString('en-US', {
+    timeZone: 'Asia/Phnom_Penh',
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  })
+}
+
+// ─── Weather (wttr.in — free, no API key) ────────────────────────────────────
+
+export async function fetchCambodiaWeather(): Promise<string> {
+  try {
+    const res = await fetch('https://wttr.in/Phnom+Penh?format=j1', {
+      headers: { 'User-Agent': 'AngkorAI/1.0 (angkorai.ai)' },
+      signal: AbortSignal.timeout(4000),
+    })
+    if (!res.ok) return ''
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any = await res.json()
+    const c = data?.current_condition?.[0]
+    if (!c) return ''
+
+    const temp    = c.temp_C
+    const feels   = c.FeelsLikeC
+    const desc    = c.weatherDesc?.[0]?.value ?? ''
+    const humid   = c.humidity
+    const wind    = c.windspeedKmph
+    const uv      = c.uvIndex
+
+    // Also grab today's forecast
+    const today   = data?.weather?.[0]
+    const maxTemp = today?.maxtempC ?? ''
+    const minTemp = today?.mintempC ?? ''
+    const rain    = today?.hourly?.reduce((sum: number, h: { precipMM: string }) => sum + parseFloat(h.precipMM ?? '0'), 0).toFixed(1) ?? '0'
+
+    return [
+      `📍 Phnom Penh, Cambodia`,
+      `🌡️  Now: ${temp}°C (feels like ${feels}°C) — ${desc}`,
+      `📊  Today: High ${maxTemp}°C / Low ${minTemp}°C`,
+      `💧  Humidity: ${humid}% | 🌬️ Wind: ${wind} km/h | ☀️ UV Index: ${uv}`,
+      `🌧️  Rain today: ${rain} mm`,
+    ].join('\n')
+  } catch {
+    return ''
+  }
+}
+
+export function isWeatherQuery(text: string): boolean {
+  const lower = text.toLowerCase()
+  const enKeywords = ['weather', 'temperature', 'rain', 'hot', 'cold', 'forecast', 'climate', 'sunny', 'cloudy', 'humid', 'flood', 'storm', 'wind']
+  const khKeywords = ['អាកាសធាតុ', 'ភ្លៀង', 'ក្តៅ', 'ត្រជាក់', 'ខ្យល់', 'ព្យាករណ៍', 'លិចទឹក', 'ព្យុះ']
+  return enKeywords.some((k) => lower.includes(k)) || khKeywords.some((k) => text.includes(k))
+}
+
+export function isTimeQuery(text: string): boolean {
+  const lower = text.toLowerCase()
+  const enKeywords = ['time', 'what time', 'hour', 'clock', 'date', 'today is', 'what day', 'what date']
+  const khKeywords = ['ម៉ោង', 'ថ្ងៃ', 'កាលបរិច្ឆេទ', 'ពេលវេលា', 'ឆ្នាំ']
+  return enKeywords.some((k) => lower.includes(k)) || khKeywords.some((k) => text.includes(k))
+}
+
+// ─── News ────────────────────────────────────────────────────────────────────
+
 // Detect if user is asking about current news/events
 export function isNewsQuery(text: string): boolean {
   const lower = text.toLowerCase()

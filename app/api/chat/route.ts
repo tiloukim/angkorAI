@@ -2,7 +2,11 @@ import { NextRequest } from 'next/server'
 import Groq from 'groq-sdk'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { PLAN_LIMITS } from '@/lib/plans'
-import { isNewsQuery, fetchCambodiaNews, formatNewsContext } from '@/lib/news'
+import {
+  isNewsQuery, fetchCambodiaNews, formatNewsContext,
+  isWeatherQuery, fetchCambodiaWeather,
+  isTimeQuery, getCambodiaTime,
+} from '@/lib/news'
 
 const DEFAULT_MODEL = process.env.AI_MODEL || "llama-3.3-70b-versatile"
 
@@ -135,12 +139,26 @@ export async function POST(req: NextRequest) {
       ? SYSTEM_PROMPT + '\n\n[The user attached an image to this message. Acknowledge it and respond to any text they wrote.]'
       : SYSTEM_PROMPT
 
+    // Always inject current Cambodia time
+    systemContent += `\n\n[Current Cambodia time: ${getCambodiaTime()}]`
+
+    // Inject live news headlines
     if (isNewsQuery(lastUserText)) {
       try {
         const newsItems = await fetchCambodiaNews()
         systemContent += formatNewsContext(newsItems)
       } catch {
-        // If news fetch fails, continue without it
+        // continue without news if fetch fails
+      }
+    }
+
+    // Inject live weather for Phnom Penh
+    if (isWeatherQuery(lastUserText) || isTimeQuery(lastUserText)) {
+      try {
+        const weather = await fetchCambodiaWeather()
+        if (weather) systemContent += `\n\n[LIVE CAMBODIA WEATHER]\n${weather}`
+      } catch {
+        // continue without weather if fetch fails
       }
     }
 
