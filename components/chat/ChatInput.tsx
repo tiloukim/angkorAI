@@ -62,7 +62,8 @@ export default function ChatInput({ onSend, disabled, isStreaming, lang, plan }:
     const rec = new SR()
     rec.lang = lang === 'kh' ? 'km-KH' : 'en-US'
     rec.interimResults = false
-    rec.onresult = (e) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    rec.onresult = (e: any) => {
       const transcript = e.results[0][0].transcript
       setValue((prev) => prev + (prev ? ' ' : '') + transcript)
     }
