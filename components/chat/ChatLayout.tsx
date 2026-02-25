@@ -110,27 +110,6 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
     if (isStreaming) return
     if (dailyLimit !== Infinity && usedToday >= dailyLimit) return
 
-    // Create conversation if needed
-    let convId = activeConvId
-    if (!convId) {
-      const res = await fetch('/api/conversations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: content.slice(0, 50) + (content.length > 50 ? '...' : ''),
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok || !data.conversation?.id) {
-        throw new Error(data.error || 'Failed to create conversation')
-      }
-      convId = data.conversation.id
-      setActiveConvId(convId)
-      fetchConversations()
-    }
-
     const userMsg: Message = {
       id: uid(),
       role: 'user',
@@ -149,6 +128,24 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
     setIsStreaming(true)
 
     try {
+      // Create conversation if needed
+      let convId = activeConvId
+      if (!convId) {
+        const res = await fetch('/api/conversations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: content.slice(0, 50) + (content.length > 50 ? '...' : ''),
+          }),
+        })
+        const data = await res.json()
+        if (!res.ok || !data.conversation?.id) {
+          throw new Error(data.error || 'Failed to create conversation')
+        }
+        convId = data.conversation.id
+        setActiveConvId(convId)
+        fetchConversations()
+      }
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: {
