@@ -10,7 +10,7 @@ export default function LandingPage() {
   const kh = lang === 'kh'
 
   return (
-    <div className="min-h-screen bg-main flex flex-col">
+    <div className="min-h-screen bg-[#212121] text-white flex flex-col">
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10">
         <div className="flex items-center gap-2">
@@ -20,7 +20,7 @@ export default function LandingPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setLang(kh ? 'en' : 'kh')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sidebar hover:bg-sidebar-hover text-gray-300 hover:text-white text-xs font-medium transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#171717] hover:bg-[#2a2a2a] text-gray-300 hover:text-white text-xs font-medium transition-colors"
           >
             <Globe size={13} />
             {kh ? 'English' : 'ខ្មែរ'}
@@ -107,7 +107,7 @@ export default function LandingPage() {
           ].map((f) => (
             <div
               key={f.title}
-              className="bg-sidebar border border-white/10 rounded-2xl p-6 text-left hover:border-accent/30 transition-colors"
+              className="bg-[#171717] border border-white/10 rounded-2xl p-6 text-left hover:border-accent/30 transition-colors"
             >
               <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center text-accent mb-4">
                 {f.icon}
@@ -168,7 +168,7 @@ export default function LandingPage() {
                 className={`rounded-2xl p-6 text-left border ${
                   plan.highlight
                     ? 'bg-accent/10 border-accent shadow-lg shadow-accent/10'
-                    : 'bg-sidebar border-white/10'
+                    : 'bg-[#171717] border-white/10'
                 }`}
               >
                 {plan.highlight && (
@@ -199,7 +199,7 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-8 text-center text-gray-500 text-sm">
+      <footer className="border-t border-white/10 py-8 text-center text-gray-400 text-sm">
         <p>© 2025 AngkorAI · {kh ? <span className="font-khmer">សម្រាប់ប្រជាជនកម្ពុជា 🇰🇭</span> : 'Built for Cambodia 🇰🇭'}</p>
         {!kh && <p className="font-khmer mt-1 text-xs">សម្រាប់ប្រជាជនកម្ពុជា</p>}
       </footer>

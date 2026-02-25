@@ -41,7 +41,7 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-main flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#212121] flex items-center justify-center px-4">
         <div className="w-full max-w-sm text-center">
           <div className="w-16 h-16 rounded-full bg-accent/10 border border-accent/30 flex items-center justify-center mx-auto mb-4">
             <Check size={28} className="text-accent" />
@@ -55,7 +55,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-main flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#212121] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
@@ -76,7 +76,7 @@ export default function SignupPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="you@example.com"
-              className="w-full bg-sidebar border border-white/15 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-accent transition-colors text-sm"
+              className="w-full bg-[#171717] border border-white/15 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-accent transition-colors text-sm"
             />
           </div>
           <div>
@@ -88,7 +88,7 @@ export default function SignupPage() {
               required
               minLength={6}
               placeholder="Min. 6 characters"
-              className="w-full bg-sidebar border border-white/15 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-accent transition-colors text-sm"
+              className="w-full bg-[#171717] border border-white/15 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-accent transition-colors text-sm"
             />
           </div>
 
