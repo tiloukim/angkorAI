@@ -195,10 +195,36 @@ export async function POST(req: NextRequest) {
             role: 'assistant',
             content: fullResponse,
           })
-          // Update conversation updated_at + auto-title from first message
+
+          // Auto-generate title on the first exchange
+          let newTitle: string | undefined
+          if (flatMessages.length === 1) {
+            try {
+              const titleRes = await groq.chat.completions.create({
+                model: DEFAULT_MODEL,
+                max_tokens: 20,
+                messages: [
+                  {
+                    role: 'system',
+                    content:
+                      'Generate a short 4-6 word title for this conversation. Return ONLY the title — no quotes, no period at the end, no explanation.',
+                  },
+                  { role: 'user', content: lastUserText.slice(0, 300) },
+                ],
+              })
+              const candidate = titleRes.choices[0]?.message?.content?.trim()
+              if (candidate) newTitle = candidate
+            } catch {
+              // title generation is best-effort — ignore errors
+            }
+          }
+
           await supabase
             .from('conversations')
-            .update({ updated_at: new Date().toISOString() })
+            .update({
+              updated_at: new Date().toISOString(),
+              ...(newTitle ? { title: newTitle } : {}),
+            })
             .eq('id', conversationId)
         }
 

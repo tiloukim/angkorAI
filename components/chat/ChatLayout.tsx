@@ -225,20 +225,8 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
       ])
       setUsedToday((u) => u + 1)
 
-      // Auto-update conversation title from first exchange if still default
-      if (nextMessages.length === 1) {
-        await fetch('/api/conversations', {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id: convId,
-            title: content.slice(0, 60) + (content.length > 60 ? '...' : ''),
-          }),
-        })
-        fetchConversations()
-      }
+      // Refresh sidebar — server auto-generates title after first exchange
+      fetchConversations()
     } catch (err) {
       console.error(err)
       setMessages((prev) => [
