@@ -48,9 +48,8 @@ export default function ChatInput({ onSend, disabled, isStreaming, lang, plan }:
   }
 
   function toggleMic() {
-    const SR =
-      (window as unknown as { SpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition ||
-      (window as unknown as { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SR) {
       alert('Voice input is not supported in this browser. Try Chrome.')
       return
