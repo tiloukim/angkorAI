@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { getAuthUser, createServiceClient } from '@/lib/supabase/server'
 
 // GET /api/conversations — list user conversations
 export async function GET(req: NextRequest) {
-  const { data: { user } } = await (await createClient()).auth.getUser()
+  const user = await getAuthUser(req)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const supabase = await createServiceClient()
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
 // POST /api/conversations — create new conversation
 export async function POST(req: NextRequest) {
-  const { data: { user } } = await (await createClient()).auth.getUser()
+  const user = await getAuthUser(req)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const supabase = await createServiceClient()
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
 // PATCH /api/conversations — update conversation title
 export async function PATCH(req: NextRequest) {
-  const { data: { user } } = await (await createClient()).auth.getUser()
+  const user = await getAuthUser(req)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const supabase = await createServiceClient()
@@ -65,7 +65,7 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE /api/conversations — delete a conversation
 export async function DELETE(req: NextRequest) {
-  const { data: { user } } = await (await createClient()).auth.getUser()
+  const user = await getAuthUser(req)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const supabase = await createServiceClient()

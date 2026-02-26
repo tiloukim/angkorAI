@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import Groq from 'groq-sdk'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { getAuthUser, createServiceClient } from '@/lib/supabase/server'
 import { PLAN_LIMITS } from '@/lib/plans'
 import {
   isNewsQuery, fetchCambodiaNews, formatNewsContext,
@@ -46,7 +46,7 @@ Always be respectful, accurate, and helpful. If you don't know something, say so
 
 export async function POST(req: NextRequest) {
   try {
-    const { data: { user } } = await (await createClient()).auth.getUser()
+    const user = await getAuthUser(req)
     if (!user) return new Response('Unauthorized', { status: 401 })
 
     const supabase = await createServiceClient()
