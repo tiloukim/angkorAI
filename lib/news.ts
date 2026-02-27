@@ -31,6 +31,7 @@ const FEEDS = [
   { name: 'Reuters',            url: 'https://feeds.reuters.com/reuters/topNews' },
   { name: 'CNN',                url: 'https://rss.cnn.com/rss/edition_world.rss' },
   { name: 'ABC News',           url: 'https://feeds.abcnews.com/abcnews/internationalheadlines' },
+  { name: 'ABC Australia',      url: 'https://www.abc.net.au/news/feed/104217382/rss.xml' },
 ]
 
 function extractCDATA(tag: string, xml: string): string {
