@@ -118,6 +118,7 @@ export async function POST(req: NextRequest) {
           : lastMsg.content
         await supabase.from('messages').insert({
           conversation_id: conversationId,
+          user_id: user.id,
           role: 'user',
           content: textContent,
         })
@@ -192,6 +193,7 @@ export async function POST(req: NextRequest) {
         if (conversationId && fullResponse) {
           await supabase.from('messages').insert({
             conversation_id: conversationId,
+            user_id: user.id,
             role: 'assistant',
             content: fullResponse,
           })
