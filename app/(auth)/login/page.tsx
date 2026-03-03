@@ -18,14 +18,6 @@ function GoogleIcon() {
   )
 }
 
-function FacebookIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path fill="#1877F2" d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073c0 6.027 4.388 11.025 10.125 11.927v-8.437H7.078v-3.49h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.49h-2.796v8.437C19.612 23.098 24 18.1 24 12.073z"/>
-    </svg>
-  )
-}
-
 
 export default function LoginPage() {
   const router = useRouter()
@@ -36,13 +28,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
 
   // Social
-  const [socialLoading, setSocialLoading] = useState<'google' | 'facebook' | null>(null)
+  const [socialLoading, setSocialLoading] = useState(false)
 
-  async function handleOAuth(provider: 'google' | 'facebook') {
-    setSocialLoading(provider)
+  async function handleOAuth() {
+    setSocialLoading(true)
     const supabase = createClient()
     await supabase.auth.signInWithOAuth({
-      provider,
+      provider: 'google',
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
   }
@@ -77,21 +69,12 @@ export default function LoginPage() {
             {/* Social buttons */}
             <div className="space-y-3 mb-4">
               <button
-                onClick={() => handleOAuth('google')}
-                disabled={!!socialLoading}
+                onClick={handleOAuth}
+                disabled={socialLoading}
                 className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 disabled:opacity-60 text-gray-800 font-semibold py-3 rounded-xl border border-gray-200 transition-colors"
               >
-                {socialLoading === 'google' ? <Loader2 size={16} className="animate-spin text-gray-500" /> : <GoogleIcon />}
-                {socialLoading === 'google' ? 'Redirecting...' : 'Continue with Google'}
-              </button>
-
-              <button
-                onClick={() => handleOAuth('facebook')}
-                disabled={!!socialLoading}
-                className="w-full flex items-center justify-center gap-3 bg-[#1877F2] hover:bg-[#166FE5] disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors"
-              >
-                {socialLoading === 'facebook' ? <Loader2 size={16} className="animate-spin" /> : <FacebookIcon />}
-                {socialLoading === 'facebook' ? 'Redirecting...' : 'Continue with Facebook'}
+                {socialLoading ? <Loader2 size={16} className="animate-spin text-gray-500" /> : <GoogleIcon />}
+                {socialLoading ? 'Redirecting...' : 'Continue with Google'}
               </button>
 
             </div>
