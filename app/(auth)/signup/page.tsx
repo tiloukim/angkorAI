@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Sparkles, Loader2, Check, ArrowLeft, Phone } from 'lucide-react'
+import { Sparkles, Loader2, Check } from 'lucide-react'
 
 function GoogleIcon() {
   return (
@@ -25,21 +25,9 @@ function FacebookIcon() {
   )
 }
 
-const COUNTRY_CODES = [
-  { code: '+855', flag: '🇰🇭', label: 'KH' },
-  { code: '+1',   flag: '🇺🇸', label: 'US' },
-  { code: '+44',  flag: '🇬🇧', label: 'GB' },
-  { code: '+61',  flag: '🇦🇺', label: 'AU' },
-  { code: '+33',  flag: '🇫🇷', label: 'FR' },
-  { code: '+66',  flag: '🇹🇭', label: 'TH' },
-  { code: '+84',  flag: '🇻🇳', label: 'VN' },
-]
-
-type Mode = 'default' | 'phone' | 'otp'
 
 export default function SignupPage() {
   const router = useRouter()
-  const [mode, setMode] = useState<Mode>('default')
   const [success, setSuccess] = useState(false)
 
   // Email/password
@@ -50,13 +38,6 @@ export default function SignupPage() {
 
   // Social
   const [socialLoading, setSocialLoading] = useState<'google' | 'facebook' | null>(null)
-
-  // Phone OTP
-  const [countryCode, setCountryCode] = useState('+855')
-  const [phoneNumber, setPhoneNumber] = useState('')
-  const [otp, setOtp] = useState('')
-  const [phoneLoading, setPhoneLoading] = useState(false)
-  const [fullPhone, setFullPhone] = useState('')
 
   async function handleOAuth(provider: 'google' | 'facebook') {
     setSocialLoading(provider)
@@ -87,50 +68,6 @@ export default function SignupPage() {
     }
   }
 
-  async function handleSendOtp(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setPhoneLoading(true)
-    const phone = `${countryCode}${phoneNumber.replace(/^0/, '')}`
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithOtp({ phone })
-    if (error) {
-      setError(error.message)
-      setPhoneLoading(false)
-    } else {
-      setFullPhone(phone)
-      setMode('otp')
-      setPhoneLoading(false)
-    }
-  }
-
-  async function handleVerifyOtp(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setPhoneLoading(true)
-    const supabase = createClient()
-    const { error } = await supabase.auth.verifyOtp({
-      phone: fullPhone,
-      token: otp,
-      type: 'sms',
-    })
-    if (error) {
-      setError(error.message)
-      setPhoneLoading(false)
-    } else {
-      router.push('/chat')
-      router.refresh()
-    }
-  }
-
-  function resetToDefault() {
-    setMode('default')
-    setError('')
-    setPhoneNumber('')
-    setOtp('')
-    setFullPhone('')
-  }
-
   if (success) {
     return (
       <div className="min-h-screen bg-[#212121] flex items-center justify-center px-4">
@@ -150,109 +87,6 @@ export default function SignupPage() {
     <div className="min-h-screen bg-[#212121] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
 
-        {/* ── Phone number entry ── */}
-        {mode === 'phone' && (
-          <>
-            <button onClick={resetToDefault} className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm mb-6 transition-colors">
-              <ArrowLeft size={15} /> Back
-            </button>
-            <div className="flex flex-col items-center mb-8">
-              <div className="w-12 h-12 rounded-full bg-accent/15 flex items-center justify-center mb-4">
-                <Phone size={22} className="text-accent" />
-              </div>
-              <h1 className="text-2xl font-bold">Sign up with phone</h1>
-              <p className="text-gray-400 text-sm mt-1">We&apos;ll send a verification code</p>
-            </div>
-            <form onSubmit={handleSendOtp} className="space-y-4">
-              <div>
-                <label className="block text-sm text-gray-300 mb-1.5">Phone number</label>
-                <div className="flex gap-2">
-                  <select
-                    value={countryCode}
-                    onChange={(e) => setCountryCode(e.target.value)}
-                    className="bg-[#171717] border border-white/15 rounded-xl px-3 py-3 text-white text-sm focus:outline-none focus:border-accent transition-colors"
-                  >
-                    {COUNTRY_CODES.map((c) => (
-                      <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    required
-                    placeholder="12 345 678"
-                    className="flex-1 bg-[#171717] border border-white/15 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-accent transition-colors text-sm"
-                  />
-                </div>
-              </div>
-              {error && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-sm">{error}</div>
-              )}
-              <button
-                type="submit"
-                disabled={phoneLoading}
-                className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
-              >
-                {phoneLoading ? <Loader2 size={16} className="animate-spin" /> : null}
-                {phoneLoading ? 'Sending...' : 'Send code'}
-              </button>
-            </form>
-          </>
-        )}
-
-        {/* ── OTP verification ── */}
-        {mode === 'otp' && (
-          <>
-            <button onClick={() => { setMode('phone'); setError('') }} className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm mb-6 transition-colors">
-              <ArrowLeft size={15} /> Back
-            </button>
-            <div className="flex flex-col items-center mb-8">
-              <div className="w-12 h-12 rounded-full bg-accent/15 flex items-center justify-center mb-4">
-                <Phone size={22} className="text-accent" />
-              </div>
-              <h1 className="text-2xl font-bold">Enter your code</h1>
-              <p className="text-gray-400 text-sm mt-1">SMS sent to <span className="text-white">{fullPhone}</span></p>
-            </div>
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div>
-                <label className="block text-sm text-gray-300 mb-1.5">6-digit code</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  required
-                  maxLength={6}
-                  placeholder="123456"
-                  className="w-full bg-[#171717] border border-white/15 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-accent transition-colors text-sm tracking-widest text-center text-xl"
-                />
-              </div>
-              {error && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-sm">{error}</div>
-              )}
-              <button
-                type="submit"
-                disabled={phoneLoading || otp.length < 6}
-                className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
-              >
-                {phoneLoading ? <Loader2 size={16} className="animate-spin" /> : null}
-                {phoneLoading ? 'Verifying...' : 'Verify & Create account'}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setMode('phone'); setError('') }}
-                className="w-full text-gray-500 hover:text-gray-300 text-sm transition-colors"
-              >
-                Resend code
-              </button>
-            </form>
-          </>
-        )}
-
-        {/* ── Default: social + email ── */}
-        {mode === 'default' && (
-          <>
             {/* Logo */}
             <div className="flex flex-col items-center mb-8">
               <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center mb-4">
@@ -283,13 +117,6 @@ export default function SignupPage() {
                 {socialLoading === 'facebook' ? 'Redirecting...' : 'Continue with Facebook'}
               </button>
 
-              <button
-                onClick={() => setMode('phone')}
-                className="w-full flex items-center justify-center gap-3 bg-[#171717] hover:bg-[#222] text-white font-semibold py-3 rounded-xl border border-white/15 transition-colors"
-              >
-                <Phone size={18} />
-                Continue with Phone
-              </button>
             </div>
 
             {/* Divider */}
@@ -348,8 +175,6 @@ export default function SignupPage() {
             <p className="text-center mt-4">
               <Link href="/" className="text-gray-500 text-xs hover:text-gray-400">← Back to home</Link>
             </p>
-          </>
-        )}
 
       </div>
     </div>
