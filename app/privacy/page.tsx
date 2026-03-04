@@ -118,6 +118,8 @@ export default function PrivacyPage() {
 
         <div className="border-t border-white/10 mt-12 pt-6 text-center text-[#6b7280] text-sm">
           <div className="flex items-center justify-center gap-4 mb-2">
+            <a href="/about" className="hover:text-white transition-colors">About</a>
+            <span className="text-white/20">&middot;</span>
             <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
             <span className="text-white/20">&middot;</span>
             <a href="/contact" className="hover:text-white transition-colors">Contact</a>
