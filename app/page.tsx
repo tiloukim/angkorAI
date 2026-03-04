@@ -200,7 +200,12 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-8 text-center text-gray-400 text-sm">
-        <p>© 2025 AngkorAI · {kh ? <span className="font-khmer">សម្រាប់ប្រជាជនកម្ពុជា 🇰🇭</span> : 'Built for Cambodia 🇰🇭'}</p>
+        <div className="flex items-center justify-center gap-4 mb-2">
+          <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
+          <span className="text-white/20">·</span>
+          <a href="/contact" className="hover:text-white transition-colors">Contact</a>
+        </div>
+        <p>© {new Date().getFullYear()} AngkorAI · {kh ? <span className="font-khmer">សម្រាប់ប្រជាជនកម្ពុជា 🇰🇭</span> : 'Built for Cambodia 🇰🇭'}</p>
         {!kh && <p className="font-khmer mt-1 text-xs">សម្រាប់ប្រជាជនកម្ពុជា</p>}
       </footer>
     </div>
