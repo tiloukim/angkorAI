@@ -27,6 +27,7 @@ export default function TelegramLoginButton() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const callbackRef = useRef(false)
+  const widgetRef = useRef<HTMLDivElement>(null)
 
   const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME
 
@@ -64,61 +65,59 @@ export default function TelegramLoginButton() {
       }
     }
 
+    // Load Telegram widget script into the hidden container
+    const container = widgetRef.current
+    if (container && !container.querySelector('script')) {
+      const script = document.createElement('script')
+      script.src = 'https://telegram.org/js/telegram-widget.js?22'
+      script.setAttribute('data-telegram-login', botUsername)
+      script.setAttribute('data-size', 'large')
+      script.setAttribute('data-onauth', '__onTelegramAuth(user)')
+      script.setAttribute('data-request-access', 'write')
+      script.async = true
+      container.appendChild(script)
+
+      // Once the iframe renders, stretch it to fill the container
+      script.onload = () => {
+        setTimeout(() => {
+          const iframe = container.querySelector('iframe')
+          if (iframe) {
+            iframe.style.position = 'absolute'
+            iframe.style.top = '0'
+            iframe.style.left = '0'
+            iframe.style.width = '100%'
+            iframe.style.height = '100%'
+            iframe.style.opacity = '0'
+            iframe.style.cursor = 'pointer'
+          }
+        }, 100)
+      }
+    }
+
     return () => {
       delete (window as unknown as Record<string, unknown>).__onTelegramAuth
     }
   }, [botUsername, router])
 
-  function handleClick() {
-    if (!botUsername || loading) return
-
-    // Load Telegram widget script and trigger auth popup
-    const script = document.createElement('script')
-    script.src = 'https://telegram.org/js/telegram-widget.js?22'
-    script.setAttribute('data-telegram-login', botUsername)
-    script.setAttribute('data-size', 'large')
-    script.setAttribute('data-onauth', '__onTelegramAuth(user)')
-    script.setAttribute('data-request-access', 'write')
-    // Hidden container — we just need the script to open the popup
-    const container = document.createElement('div')
-    container.style.display = 'none'
-    document.body.appendChild(container)
-    container.appendChild(script)
-
-    // Clean up after script loads
-    script.onload = () => {
-      // The Telegram iframe is now injected; find and click it
-      setTimeout(() => {
-        const iframe = container.querySelector('iframe')
-        if (iframe) {
-          // Open the auth popup directly
-          const width = 550
-          const height = 470
-          const left = Math.round(screen.width / 2 - width / 2)
-          const top = Math.round(screen.height / 2 - height / 2)
-          window.open(
-            `https://oauth.telegram.org/auth?bot_id=${botUsername}&origin=${encodeURIComponent(window.location.origin)}&request_access=write&return_to=${encodeURIComponent(window.location.href)}`,
-            'telegram_auth',
-            `width=${width},height=${height},left=${left},top=${top}`
-          )
-        }
-        container.remove()
-      }, 100)
-    }
-  }
-
   if (!botUsername) return null
 
   return (
     <div>
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        className="w-full flex items-center justify-center gap-3 bg-[#54A9EB] hover:bg-[#4A96D2] disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors"
-      >
-        {loading ? <Loader2 size={16} className="animate-spin" /> : <TelegramIcon />}
-        {loading ? 'Signing in...' : 'Continue with Telegram'}
-      </button>
+      <div className="relative">
+        {/* Our styled button (visible) */}
+        <button
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-3 bg-[#54A9EB] hover:bg-[#4A96D2] disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors pointer-events-none"
+        >
+          {loading ? <Loader2 size={16} className="animate-spin" /> : <TelegramIcon />}
+          {loading ? 'Signing in...' : 'Continue with Telegram'}
+        </button>
+        {/* Invisible Telegram iframe overlay — captures real clicks */}
+        <div
+          ref={widgetRef}
+          className="absolute inset-0 overflow-hidden"
+        />
+      </div>
       {error && (
         <p className="text-red-400 text-xs text-center mt-2">{error}</p>
       )}
