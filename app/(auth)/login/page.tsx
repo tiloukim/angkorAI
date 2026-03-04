@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2 } from 'lucide-react'
+import TelegramLoginButton from '@/components/TelegramLoginButton'
 
 function GoogleIcon() {
   return (
@@ -77,6 +78,7 @@ export default function LoginPage() {
                 {socialLoading ? 'Redirecting...' : 'Continue with Google'}
               </button>
 
+              <TelegramLoginButton />
             </div>
 
             {/* Divider */}

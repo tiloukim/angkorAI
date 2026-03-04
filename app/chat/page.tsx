@@ -20,10 +20,14 @@ export default async function ChatPage() {
 
   const plan = profile?.plan ?? 'free'
 
+  const displayName = user.user_metadata?.auth_provider === 'telegram'
+    ? (user.user_metadata.username ? `@${user.user_metadata.username}` : user.user_metadata.first_name)
+    : (user.email ?? '')
+
   return (
     <ChatLayout
       userId={user.id}
-      userEmail={user.email ?? ''}
+      userEmail={displayName}
       plan={plan}
       token={token}
     />
