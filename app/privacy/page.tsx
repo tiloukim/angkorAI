@@ -109,8 +109,8 @@ export default function PrivacyPage() {
             <p>
               If you have questions about this Privacy Policy or wish to request data deletion,
               please contact us at{' '}
-              <a href="mailto:tiloukim@gmail.com" className="text-[#10a37f] hover:underline">
-                tiloukim@gmail.com
+              <a href="mailto:contact@angkorai.ai" className="text-[#10a37f] hover:underline">
+                contact@angkorai.ai
               </a>.
             </p>
           </section>
