@@ -4,15 +4,30 @@ import { createServerClient } from '@supabase/ssr'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  const error = searchParams.get('error')
+  const errorDescription = searchParams.get('error_description')
+
+  if (error) {
+    console.error('[auth/callback] OAuth error:', error, errorDescription)
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(errorDescription || error)}`)
+  }
 
   const redirectUrl = `${origin}/chat`
 
   if (code) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('[auth/callback] Missing env vars:', { supabaseUrl: !!supabaseUrl, supabaseKey: !!supabaseKey })
+      return NextResponse.redirect(`${origin}/login?error=server_config`)
+    }
+
     const response = NextResponse.redirect(redirectUrl)
 
     const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      supabaseUrl,
+      supabaseKey,
       {
         cookies: {
           getAll() {
@@ -27,9 +42,15 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    await supabase.auth.exchangeCodeForSession(code)
+    const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
+    if (sessionError) {
+      console.error('[auth/callback] exchangeCodeForSession failed:', sessionError.message)
+      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(sessionError.message)}`)
+    }
+
     return response
   }
 
-  return NextResponse.redirect(redirectUrl)
+  console.error('[auth/callback] No code in callback URL')
+  return NextResponse.redirect(`${origin}/login?error=no_code`)
 }

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
@@ -22,6 +22,7 @@ function GoogleIcon() {
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   // Email/password
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -30,6 +31,11 @@ export default function LoginPage() {
 
   // Social
   const [socialLoading, setSocialLoading] = useState(false)
+
+  useEffect(() => {
+    const urlError = searchParams.get('error')
+    if (urlError) setError(`Auth error: ${urlError}`)
+  }, [searchParams])
 
   async function handleOAuth() {
     setSocialLoading(true)
