@@ -179,3 +179,221 @@ html, body {
     padding-bottom: 0.5rem;
   }
 }
+
+/* ===== Support Chat Widget ===== */
+.support-fab {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #dc2626;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+  z-index: 50;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.support-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.5);
+}
+
+.support-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #9ca3af;
+  border: 2px solid white;
+}
+.support-dot.online {
+  background: #22c55e;
+  animation: pulse-dot 2s infinite;
+}
+
+.support-dot-inline {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #9ca3af;
+  flex-shrink: 0;
+}
+.support-dot-inline.online {
+  background: #22c55e;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
+}
+
+.support-panel {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 360px;
+  height: 480px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  z-index: 50;
+  overflow: hidden;
+}
+
+.support-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  background: #fafafa;
+}
+
+.support-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+}
+
+.support-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.support-input {
+  flex: 1;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+  color: #1a1a1a;
+  background: white;
+}
+.support-input:focus {
+  border-color: #10a37f;
+}
+
+.support-send-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #10a37f;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.support-send-btn:hover {
+  background: #0d8c6c;
+}
+.support-send-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+
+/* Chat bubbles (shared between support widget and admin) */
+.chat-bubble-mine {
+  max-width: 75%;
+  background: #10a37f;
+  color: white;
+  border-radius: 16px 16px 4px 16px;
+  padding: 8px 14px;
+  margin-bottom: 6px;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin-left: auto;
+  word-break: break-word;
+}
+.chat-bubble-theirs {
+  max-width: 75%;
+  background: #f3f4f6;
+  color: #1a1a1a;
+  border-radius: 16px 16px 16px 4px;
+  padding: 8px 14px;
+  margin-bottom: 6px;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* ===== Admin Dashboard ===== */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.admin-online-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.admin-online-toggle:hover {
+  border-color: #d1d5db;
+}
+.admin-online-toggle.online {
+  background: #ecfdf5;
+  border-color: #10a37f;
+  color: #065f46;
+}
+
+.admin-chat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.1s;
+}
+.admin-chat-item:hover {
+  background: #f9fafb;
+}
+.admin-chat-item.active {
+  background: #f0fdf4;
+  border-left: 3px solid #10a37f;
+}
+
+@media (max-width: 640px) {
+  .support-panel {
+    width: calc(100vw - 2rem);
+    height: calc(100dvh - 6rem);
+    bottom: 1rem;
+    right: 1rem;
+  }
+}

@@ -10,6 +10,7 @@ function uid() {
 }
 import ChatSidebar from './ChatSidebar'
 import ChatMain from './ChatMain'
+import SupportChat from '@/components/SupportChat'
 import { PLAN_LIMITS, PLAN_DETAILS, type Plan } from '@/lib/plans'
 
 export interface Message {
@@ -279,6 +280,7 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
         onToggleLang={() => setLang(lang === 'en' ? 'kh' : 'en')}
         onSelectModel={setSelectedModel}
       />
+      <SupportChat userId={userId} />
     </div>
   )
 }
