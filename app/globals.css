@@ -390,6 +390,12 @@ html, body {
 }
 
 @media (max-width: 640px) {
+  .support-fab {
+    bottom: 5rem;
+    right: 0.75rem;
+    width: 44px;
+    height: 44px;
+  }
   .support-panel {
     width: calc(100vw - 2rem);
     height: calc(100dvh - 6rem);
