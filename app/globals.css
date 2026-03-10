@@ -183,7 +183,7 @@ html, body {
 /* ===== Support Chat Widget ===== */
 .support-fab {
   position: fixed;
-  bottom: 1.5rem;
+  bottom: 5.5rem;
   right: 1.5rem;
   width: 52px;
   height: 52px;
