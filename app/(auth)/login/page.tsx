@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2 } from 'lucide-react'
 import TelegramLoginButton from '@/components/TelegramLoginButton'
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 
 function GoogleIcon() {
   return (
@@ -27,6 +28,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState('')
+  const turnstileRef = useRef<TurnstileInstance>(null)
 
   // Social
   const [socialLoading, setSocialLoading] = useState(false)
@@ -51,7 +54,15 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: { captchaToken },
+    })
+
+    setCaptchaToken('')
+    turnstileRef.current?.reset()
+
     if (error) {
       setError(error.message)
       setLoading(false)
@@ -122,9 +133,17 @@ export default function LoginPage() {
                 <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-sm">{error}</div>
               )}
 
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                onSuccess={setCaptchaToken}
+                onExpire={() => setCaptchaToken('')}
+                options={{ theme: 'dark', size: 'flexible' }}
+              />
+
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !captchaToken}
                 className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
               >
                 {loading ? <Loader2 size={16} className="animate-spin" /> : null}
