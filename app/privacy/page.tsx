@@ -124,7 +124,7 @@ export default function PrivacyPage() {
             <span className="text-white/20">&middot;</span>
             <a href="/contact" className="hover:text-white transition-colors">Contact</a>
           </div>
-          <p>&copy; {new Date().getFullYear()} AngkorAI. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} AngkorAI™. All rights reserved.</p>
         </div>
       </div>
     </div>

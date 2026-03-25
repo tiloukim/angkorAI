@@ -419,7 +419,7 @@ export default function FortunePage() {
           <span className="text-white/20">&middot;</span>
           <a href="/contact" className="hover:text-white transition-colors">{kh ? <span className="font-khmer">ទំនាក់ទំនង</span> : 'Contact'}</a>
         </div>
-        <p>&copy; {new Date().getFullYear()} AngkorAI &middot; {kh ? <span className="font-khmer">សម្រាប់ប្រជាជនកម្ពុជា 🇰🇭</span> : 'Built for Cambodia 🇰🇭'}</p>
+        <p>&copy; {new Date().getFullYear()} AngkorAI™ &middot; All rights reserved. &middot; {kh ? <span className="font-khmer">សម្រាប់ប្រជាជនកម្ពុជា 🇰🇭</span> : 'Built for Cambodia 🇰🇭'}</p>
       </footer>
     </div>
   )

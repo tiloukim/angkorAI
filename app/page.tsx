@@ -207,7 +207,7 @@ export default function LandingPage() {
           <span className="text-white/20">·</span>
           <a href="/contact" className="hover:text-white transition-colors">Contact</a>
         </div>
-        <p>© {new Date().getFullYear()} AngkorAI · {kh ? <span className="font-khmer">សម្រាប់ប្រជាជនកម្ពុជា 🇰🇭</span> : 'Built for Cambodia 🇰🇭'}</p>
+        <p>© {new Date().getFullYear()} AngkorAI™ · All rights reserved. · {kh ? <span className="font-khmer">សម្រាប់ប្រជាជនកម្ពុជា 🇰🇭</span> : 'Built for Cambodia 🇰🇭'}</p>
         {!kh && <p className="font-khmer mt-1 text-xs">សម្រាប់ប្រជាជនកម្ពុជា</p>}
       </footer>
     </div>
