@@ -1,7 +1,7 @@
 export type Plan = 'free' | 'pro' | 'business'
 
 export const PLAN_LIMITS: Record<Plan, number> = {
-  free: 30,
+  free: 100,
   pro: 1000,
   business: Infinity,
 }
@@ -11,9 +11,9 @@ export const PLAN_DETAILS = {
     name: 'Free',
     nameKh: 'ឥតគិតថ្លៃ',
     price: 0,
-    limit: 30,
-    description: '30 messages per day',
-    descriptionKh: '៣០ សារក្នុងមួយថ្ងៃ',
+    limit: 100,
+    description: '100 messages per day',
+    descriptionKh: '១០០ សារក្នុងមួយថ្ងៃ',
     color: 'text-gray-400',
     badge: 'bg-gray-700 text-gray-300',
   },
