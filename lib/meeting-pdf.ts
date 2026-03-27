@@ -2,23 +2,17 @@ import { pdf, Font } from '@react-pdf/renderer'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { createElement } from 'react'
 
-// Register Noto Sans Khmer for Khmer script support
+// Register Noto Sans Khmer for Khmer script support (hosted locally)
 Font.register({
   family: 'NotoSansKhmer',
   fonts: [
-    {
-      src: 'https://fonts.gstatic.com/s/notosanskhmer/v24/ijw3s5roRME5LLRxjsRb-gssOenAyendxrgV2c-Zw-9vbVUti_Z_dNSzwE.ttf',
-      fontWeight: 400,
-    },
-    {
-      src: 'https://fonts.gstatic.com/s/notosanskhmer/v24/ijw3s5roRME5LLRxjsRb-gssOenAyendxrgV2c-Zw-9vbVUti_Z_dWizwE.ttf',
-      fontWeight: 700,
-    },
+    { src: '/fonts/NotoSansKhmer-Regular.ttf', fontWeight: 400 },
+    { src: '/fonts/NotoSansKhmer-Bold.ttf', fontWeight: 700 },
   ],
 })
 
 // Disable hyphenation (causes issues with Khmer)
-Font.registerHyphenationCallback((word) => [word])
+Font.registerHyphenationCallback((word: string) => [word])
 
 const styles = StyleSheet.create({
   page: {
