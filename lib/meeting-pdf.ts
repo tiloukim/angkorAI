@@ -2,12 +2,21 @@ import { pdf, Font } from '@react-pdf/renderer'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { createElement } from 'react'
 
-// Register Noto Sans Khmer for Khmer script support (hosted locally)
+// Khmer font URLs — resolved at runtime to full URLs
+const KHMER_FONT_REGULAR = typeof window !== 'undefined'
+  ? `${window.location.origin}/fonts/NotoSansKhmer-Regular.ttf`
+  : 'https://www.angkorai.ai/fonts/NotoSansKhmer-Regular.ttf'
+
+const KHMER_FONT_BOLD = typeof window !== 'undefined'
+  ? `${window.location.origin}/fonts/NotoSansKhmer-Bold.ttf`
+  : 'https://www.angkorai.ai/fonts/NotoSansKhmer-Bold.ttf'
+
+// Register Noto Sans Khmer for Khmer script support
 Font.register({
   family: 'NotoSansKhmer',
   fonts: [
-    { src: '/fonts/NotoSansKhmer-Regular.ttf', fontWeight: 400 },
-    { src: '/fonts/NotoSansKhmer-Bold.ttf', fontWeight: 700 },
+    { src: KHMER_FONT_REGULAR, fontWeight: 400 },
+    { src: KHMER_FONT_BOLD, fontWeight: 700 },
   ],
 })
 
