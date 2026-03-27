@@ -2,31 +2,34 @@ import { pdf, Font } from '@react-pdf/renderer'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { createElement } from 'react'
 
-// Khmer font URLs — resolved at runtime to full URLs
-const KHMER_FONT_REGULAR = typeof window !== 'undefined'
-  ? `${window.location.origin}/fonts/NotoSansKhmer-Regular.ttf`
-  : 'https://www.angkorai.ai/fonts/NotoSansKhmer-Regular.ttf'
-
-const KHMER_FONT_BOLD = typeof window !== 'undefined'
-  ? `${window.location.origin}/fonts/NotoSansKhmer-Bold.ttf`
-  : 'https://www.angkorai.ai/fonts/NotoSansKhmer-Bold.ttf'
-
-// Register Noto Sans Khmer for Khmer script support
-Font.register({
-  family: 'NotoSansKhmer',
-  fonts: [
-    { src: KHMER_FONT_REGULAR, fontWeight: 400 },
-    { src: KHMER_FONT_BOLD, fontWeight: 700 },
-  ],
-})
-
-// Disable hyphenation (causes issues with Khmer)
+// Disable hyphenation
 Font.registerHyphenationCallback((word: string) => [word])
+
+let fontRegistered = false
+
+function ensureFontsRegistered() {
+  if (fontRegistered) return
+  fontRegistered = true
+  try {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.angkorai.ai'
+    Font.register({
+      family: 'NotoSansKhmer',
+      fonts: [
+        { src: `${origin}/fonts/NotoSansKhmer-Regular.ttf`, fontWeight: 400 },
+        { src: `${origin}/fonts/NotoSansKhmer-Bold.ttf`, fontWeight: 700 },
+      ],
+    })
+  } catch {
+    // Font registration failed — will use Helvetica fallback
+  }
+}
+
+const PDF_FONT = 'Helvetica'
 
 const styles = StyleSheet.create({
   page: {
     padding: 40,
-    fontFamily: 'NotoSansKhmer',
+    fontFamily: PDF_FONT,
     fontSize: 11,
     color: '#1a1a1a',
   },
@@ -45,8 +48,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 18,
-    fontFamily: 'NotoSansKhmer',
-    fontWeight: 'bold' as const,
+    fontFamily: 'Helvetica-Bold',
     color: '#10a37f',
   },
   headerSub: {
@@ -56,8 +58,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 13,
-    fontFamily: 'NotoSansKhmer',
-    fontWeight: 'bold' as const,
+    fontFamily: 'Helvetica-Bold',
     color: '#1a1a1a',
     marginTop: 16,
     marginBottom: 8,
@@ -186,6 +187,7 @@ function MeetingPdfDocument({ summary, transcript, duration }: {
 
 export async function generateMeetingPdf(summary: string, transcript: string, duration: number) {
   try {
+    ensureFontsRegistered()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const doc = createElement(MeetingPdfDocument, { summary, transcript, duration }) as any
     const blob = await pdf(doc).toBlob()
