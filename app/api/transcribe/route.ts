@@ -83,13 +83,28 @@ export async function POST(req: NextRequest) {
 
     let result: { text: string; duration?: number }
 
-    if (language === 'km' && GOOGLE_API_KEY) {
-      // Khmer → Google Cloud STT (much better Khmer accuracy)
+    if (language === 'en') {
+      // English → Groq Whisper (fast, great for English)
+      result = await transcribeWithWhisper(audio, 'en')
+    } else if (language === 'km' && GOOGLE_API_KEY) {
+      // Khmer → Google Cloud STT (dedicated Khmer model)
       const buffer = await audio.arrayBuffer()
       result = await transcribeWithGoogle(buffer)
+    } else if (GOOGLE_API_KEY) {
+      // Auto → Try Google STT first (better multilingual), fall back to Whisper
+      try {
+        const buffer = await audio.arrayBuffer()
+        result = await transcribeWithGoogle(buffer)
+        // If Google returns empty, fall back to Whisper
+        if (!result.text.trim()) {
+          result = await transcribeWithWhisper(audio)
+        }
+      } catch {
+        result = await transcribeWithWhisper(audio)
+      }
     } else {
-      // English / Auto → Groq Whisper (fast, great for English)
-      result = await transcribeWithWhisper(audio, language === 'km' ? 'km' : language || undefined)
+      // No Google key → Whisper for everything
+      result = await transcribeWithWhisper(audio, language || undefined)
     }
 
     return new Response(
