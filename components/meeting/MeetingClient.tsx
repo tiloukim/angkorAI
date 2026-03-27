@@ -65,7 +65,8 @@ export default function MeetingClient({ token, plan }: Props) {
   const fetchMeetings = async () => {
     try {
       const res = await fetch('/api/meetings', {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: 'include',
       })
       if (res.ok) {
         const data = await res.json()

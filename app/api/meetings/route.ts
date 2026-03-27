@@ -7,6 +7,8 @@ export async function GET(req: NextRequest) {
     const user = await getAuthUser(req)
     if (!user) return new Response('Unauthorized', { status: 401 })
 
+    console.log('Meetings GET — user:', user.id, user.email)
+
     const supabase = await createServiceClient()
     const { data, error } = await supabase
       .from('meeting_summaries')
@@ -14,9 +16,14 @@ export async function GET(req: NextRequest) {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('Meetings GET — DB error:', error)
+      throw error
+    }
 
-    return new Response(JSON.stringify(data), {
+    console.log('Meetings GET — found:', data?.length, 'meetings')
+
+    return new Response(JSON.stringify(data || []), {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (err: unknown) {
