@@ -44,7 +44,9 @@ export default function MeetingClient({ token, plan }: Props) {
   const [audioLang, setAudioLang] = useState<'auto' | 'en' | 'km'>('auto')
   const [savedMeetings, setSavedMeetings] = useState<SavedMeeting[]>([])
   const [activeMeetingId, setActiveMeetingId] = useState<string | null>(null)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(
+    typeof window !== 'undefined' ? window.innerWidth >= 768 : true
+  )
   const [saving, setSaving] = useState(false)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
