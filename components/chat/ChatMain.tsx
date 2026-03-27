@@ -9,7 +9,7 @@ import type { Message } from './ChatLayout'
 import type { Plan } from '@/lib/plans'
 
 const MODELS = [
-  { id: 'angkor-llm',              label: 'Angkor LLM',    desc: 'Cambodia\'s AI' },
+  { id: 'angkor-llm',              label: 'Angkor LLM',    desc: 'Cambodia\'s AI', soon: true },
   { id: 'llama-3.3-70b-versatile', label: 'AngkorAI',      desc: 'Default' },
 ]
 
@@ -84,15 +84,20 @@ export default function ChatMain({
                   {MODELS.map((m) => (
                     <button
                       key={m.id}
-                      onClick={() => { onSelectModel(m.id); setModelOpen(false) }}
+                      disabled={m.soon}
+                      onClick={() => { if (!m.soon) { onSelectModel(m.id); setModelOpen(false) } }}
                       className={`w-full text-left px-4 py-2.5 text-xs transition-colors flex items-center justify-between ${
-                        selectedModel === m.id
+                        m.soon
+                          ? 'opacity-50 cursor-not-allowed text-gray-400'
+                          : selectedModel === m.id
                           ? 'text-gray-900 bg-gray-50 hover:bg-gray-100'
                           : 'text-gray-600 hover:bg-gray-50'
                       }`}
                     >
                       <span className="font-medium">{m.label}</span>
-                      <span className="text-gray-400">{m.desc}</span>
+                      <span className={m.soon ? 'text-accent text-[10px]' : 'text-gray-400'}>
+                        {m.soon ? 'Soon' : m.desc}
+                      </span>
                     </button>
                   ))}
                 </div>
