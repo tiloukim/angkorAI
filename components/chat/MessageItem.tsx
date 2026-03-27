@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { Sparkles, User, Volume2, VolumeX, Loader2 } from 'lucide-react'
+import { Sparkles, User, Volume2, VolumeX, Loader2, Download } from 'lucide-react'
 import type { Message } from './ChatLayout'
 
 interface Props {
@@ -122,7 +122,44 @@ export default function MessageItem({ message, lang, token }: Props) {
         ) : (
           <>
             <div className={`prose-chat text-sm ${lang === 'kh' ? 'font-khmer' : ''} ${message.streaming ? 'cursor-blink' : ''}`}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  img: ({ src, alt }) => {
+                    const srcStr = typeof src === 'string' ? src : ''
+                    if (srcStr.startsWith('POLLINATIONS:')) {
+                      const prompt = encodeURIComponent(srcStr.replace('POLLINATIONS:', ''))
+                      const imageUrl = `https://image.pollinations.ai/prompt/${prompt}?width=768&height=768&nologo=true`
+                      return (
+                        <div className="my-3">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={imageUrl}
+                            alt={alt || 'AI generated image'}
+                            className="rounded-xl max-w-full border border-gray-200 shadow-sm"
+                            loading="lazy"
+                          />
+                          <div className="flex items-center gap-2 mt-2">
+                            <a
+                              href={imageUrl}
+                              download={`angkorai-image-${Date.now()}.jpg`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-xs text-gray-400 hover:text-accent transition-colors"
+                            >
+                              <Download size={12} />
+                              Download
+                            </a>
+                          </div>
+                        </div>
+                      )
+                    }
+                    // Regular images
+                    // eslint-disable-next-line @next/next/no-img-element
+                    return <img src={srcStr} alt={alt || ''} className="rounded-xl max-w-full" />
+                  },
+                }}
+              >
                 {message.content}
               </ReactMarkdown>
             </div>

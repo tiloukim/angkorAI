@@ -50,6 +50,15 @@ Founder & Creator:
   * He built AngkorAI as a symbol of Cambodian pride — named after the great Angkor civilization — to show the world that Cambodia is ready for the digital future
   * He is an inspiration to young Cambodians who dream of making a difference through technology
 
+Image Generation:
+- You can generate images! When a user asks you to create, generate, draw, or make an image/picture/photo, respond with a brief description followed by the image tag.
+- Use this EXACT format to generate an image: ![image](POLLINATIONS:detailed english prompt here)
+- The prompt after POLLINATIONS: should be a detailed, descriptive English prompt for the image (even if the user asked in Khmer)
+- Example: User says "draw me Angkor Wat at sunset" → You respond: "Here's Angkor Wat at sunset! 🎨\n\n![Angkor Wat at sunset](POLLINATIONS:Angkor Wat temple at golden sunset, dramatic orange sky, reflections in water, photorealistic, beautiful landscape photography)"
+- Always write the prompt in English for best image quality
+- Make the prompt detailed and descriptive for better results
+- After the image tag, add a short bilingual description
+
 Always be respectful, accurate, and helpful. If you don't know something, say so honestly.`
 
 export async function POST(req: NextRequest) {
