@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import {
   Mic, Square, Upload, FileText, ArrowLeft, Loader2, Download,
-  ChevronDown, ChevronUp, Clock, CheckCircle2, Plus, Trash2, PanelLeft, X,
+  ChevronDown, ChevronUp, Clock, CheckCircle2, Plus, Trash2, PanelLeft, X, RefreshCw,
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -54,9 +54,12 @@ export default function MeetingClient({ token, plan }: Props) {
 
   const maxDuration = plan === 'free' ? 5 * 60 : 60 * 60
 
-  // Load saved meetings
+  // Load saved meetings on mount and when window regains focus
   useEffect(() => {
     fetchMeetings()
+    const onFocus = () => fetchMeetings()
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
   }, [token])
 
   const fetchMeetings = async () => {
@@ -301,9 +304,14 @@ export default function MeetingClient({ token, plan }: Props) {
                 <Image src="/logo.png" alt="AngkorAI" width={24} height={24} className="rounded-full" />
                 <span className="font-semibold text-sm text-gray-900">Meetings</span>
               </div>
-              <button onClick={() => setSidebarOpen(false)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400">
-                <X size={16} />
-              </button>
+              <div className="flex items-center gap-1">
+                <button onClick={fetchMeetings} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700" title="Refresh">
+                  <RefreshCw size={14} />
+                </button>
+                <button onClick={() => setSidebarOpen(false)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400">
+                  <X size={16} />
+                </button>
+              </div>
             </div>
 
             {/* New recording button */}
