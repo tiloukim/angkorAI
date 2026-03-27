@@ -14,6 +14,7 @@ import {
   Crown,
   Sparkles,
   Settings,
+  Mic,
 } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -138,7 +139,7 @@ export default function ChatSidebar({
         </div>
 
         {/* New Chat */}
-        <div className="px-3 mb-2">
+        <div className="px-3 mb-1">
           <button
             onClick={onNewChat}
             className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-sidebar-hover text-gray-600 hover:text-gray-900 text-sm transition-colors group"
@@ -150,6 +151,21 @@ export default function ChatSidebar({
               'New chat'
             )}
           </button>
+        </div>
+
+        {/* Meeting Summarizer */}
+        <div className="px-3 mb-2">
+          <Link
+            href="/meeting"
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-sidebar-hover text-gray-600 hover:text-gray-900 text-sm transition-colors group"
+          >
+            <Mic size={16} className="text-gray-400 group-hover:text-accent" />
+            {lang === 'kh' ? (
+              <span className="font-khmer">សង្ខេបកិច្ចប្រជុំ</span>
+            ) : (
+              'Meeting Summarizer'
+            )}
+          </Link>
         </div>
 
         {/* Conversations list */}

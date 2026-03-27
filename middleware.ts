@@ -32,8 +32,8 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // Protect /chat routes
-  if (pathname.startsWith('/chat') && !user) {
+  // Protect /chat and /meeting routes
+  if ((pathname.startsWith('/chat') || pathname.startsWith('/meeting')) && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
