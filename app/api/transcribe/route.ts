@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData()
     const audio = formData.get('audio') as File | null
+    const language = formData.get('language') as string | null  // 'en' or 'km'
 
     if (!audio) {
       return new Response(JSON.stringify({ error: 'No audio file provided' }), {
@@ -23,6 +24,7 @@ export async function POST(req: NextRequest) {
       file: audio,
       model: 'whisper-large-v3',
       response_format: 'verbose_json',
+      ...(language ? { language } : {}),
     })
 
     // verbose_json returns extra fields beyond the base type

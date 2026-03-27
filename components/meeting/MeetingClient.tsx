@@ -26,6 +26,7 @@ export default function MeetingClient({ token, plan }: Props) {
   const [recordingTime, setRecordingTime] = useState(0)
   const [error, setError] = useState('')
   const [showTranscript, setShowTranscript] = useState(false)
+  const [audioLang, setAudioLang] = useState<'en' | 'km'>('en')
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
@@ -94,6 +95,7 @@ export default function MeetingClient({ token, plan }: Props) {
       // Step 1: Transcribe
       const formData = new FormData()
       formData.append('audio', audioBlob, 'recording.webm')
+      formData.append('language', audioLang)
 
       const transcribeRes = await fetch('/api/transcribe', {
         method: 'POST',
@@ -226,6 +228,33 @@ export default function MeetingClient({ token, plan }: Props) {
               {plan === 'free' && (
                 <p className="text-xs text-accent mt-2">Free plan: max 5 minute recordings</p>
               )}
+            </div>
+
+            {/* Language selector */}
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-xs text-gray-500">Audio language:</span>
+              <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => setAudioLang('en')}
+                  className={`px-4 py-1.5 text-xs font-medium transition-colors ${
+                    audioLang === 'en'
+                      ? 'bg-accent text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  onClick={() => setAudioLang('km')}
+                  className={`px-4 py-1.5 text-xs font-medium transition-colors ${
+                    audioLang === 'km'
+                      ? 'bg-accent text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  ខ្មែរ
+                </button>
+              </div>
             </div>
 
             {/* Record button */}
