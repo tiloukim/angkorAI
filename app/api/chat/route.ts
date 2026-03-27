@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import Groq from 'groq-sdk'
+import OpenAI from 'openai'
 import { getAuthUser, createServiceClient } from '@/lib/supabase/server'
 import { PLAN_LIMITS } from '@/lib/plans'
 import {
@@ -9,9 +10,14 @@ import {
 } from '@/lib/news'
 
 const DEFAULT_MODEL = process.env.AI_MODEL || "llama-3.3-70b-versatile"
+const ANGKOR_LLM_MODEL = process.env.ANGKOR_LLM_MODEL || ""  // e.g. "tiloukim/angkor-llm-7b"
+const RUNPOD_ENDPOINT_ID = process.env.RUNPOD_ENDPOINT_ID || ""
+const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY || ""
 
 const ALLOWED_MODELS = new Set([
   'llama-3.3-70b-versatile',
+  'angkor-llm',
+  ...(ANGKOR_LLM_MODEL ? [ANGKOR_LLM_MODEL] : []),
 ])
 
 const SYSTEM_PROMPT = `You are AngkorAI, Cambodia's first bilingual AI assistant. You speak both Khmer (ភាសាខ្មែរ) and English fluently.
@@ -90,14 +96,16 @@ export async function POST(req: NextRequest) {
     // Parse request body
     const { messages, conversationId, model: requestedModel, hasImage } = await req.json()
 
-    // Free plan is locked to Angkor LLM (falls back to DEFAULT_MODEL until live)
-    // Pro+ plans can choose any allowed model
-    // If an image is attached, override to a vision-capable model
-    const ANGKOR_LLM_ENDPOINT = process.env.ANGKOR_LLM_MODEL  // set when model is deployed
+    // Free plan uses Angkor LLM (falls back to Groq if not configured)
+    // Pro+ plans can choose Angkor LLM or AngkorAI (Groq)
+    const useAngkorLLM = ANGKOR_LLM_MODEL && RUNPOD_ENDPOINT_ID && RUNPOD_API_KEY
+    const wantsAngkorLLM = requestedModel === 'angkor-llm' || requestedModel === ANGKOR_LLM_MODEL
     const baseModel = plan === 'free'
-      ? (ANGKOR_LLM_ENDPOINT ?? DEFAULT_MODEL)
-      : (requestedModel && ALLOWED_MODELS.has(requestedModel) ? requestedModel : DEFAULT_MODEL)
+      ? (useAngkorLLM ? ANGKOR_LLM_MODEL : DEFAULT_MODEL)
+      : (wantsAngkorLLM && useAngkorLLM ? ANGKOR_LLM_MODEL
+        : (requestedModel && ALLOWED_MODELS.has(requestedModel) ? requestedModel : DEFAULT_MODEL))
     const model = baseModel
+    const isRunPod = useAngkorLLM && model === ANGKOR_LLM_MODEL
 
     // Increment usage
     await supabase.from('daily_usage').upsert(
@@ -163,17 +171,37 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Stream response from Groq
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
-    const stream = await groq.chat.completions.create({
-      model,
-      max_tokens: 4096,
-      stream: true,
-      messages: [
-        { role: 'system', content: systemContent },
-        ...flatMessages,
-      ],
-    })
+    // Stream response from Groq or RunPod (Angkor LLM)
+    const chatMessages = [
+      { role: 'system' as const, content: systemContent },
+      ...flatMessages,
+    ]
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let stream: AsyncIterable<any>
+
+    if (isRunPod) {
+      // RunPod vLLM endpoint — OpenAI-compatible API
+      const runpod = new OpenAI({
+        apiKey: RUNPOD_API_KEY,
+        baseURL: `https://api.runpod.ai/v2/${RUNPOD_ENDPOINT_ID}/openai/v1`,
+      })
+      stream = await runpod.chat.completions.create({
+        model: ANGKOR_LLM_MODEL,
+        max_tokens: 2048,
+        stream: true,
+        messages: chatMessages,
+      })
+    } else {
+      // Groq
+      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+      stream = await groq.chat.completions.create({
+        model,
+        max_tokens: 4096,
+        stream: true,
+        messages: chatMessages,
+      })
+    }
 
     // Collect full response for DB save
     let fullResponse = ''
@@ -182,7 +210,7 @@ export async function POST(req: NextRequest) {
     const readable = new ReadableStream({
       async start(controller) {
         for await (const chunk of stream) {
-          const text = chunk.choices[0]?.delta?.content ?? ''
+          const text = chunk.choices?.[0]?.delta?.content ?? ''
           if (text) {
             fullResponse += text
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`))
@@ -202,7 +230,8 @@ export async function POST(req: NextRequest) {
           let newTitle: string | undefined
           if (flatMessages.length === 1) {
             try {
-              const titleRes = await groq.chat.completions.create({
+              const titleGroq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+              const titleRes = await titleGroq.chat.completions.create({
                 model: DEFAULT_MODEL,
                 max_tokens: 20,
                 messages: [
