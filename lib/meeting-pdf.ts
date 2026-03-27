@@ -1,50 +1,18 @@
-import { pdf, Font } from '@react-pdf/renderer'
+import { pdf } from '@react-pdf/renderer'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { createElement } from 'react'
-
-// Disable hyphenation
-Font.registerHyphenationCallback((word: string) => [word])
-
-let fontRegistered = false
-
-function ensureFontsRegistered() {
-  if (fontRegistered) return
-  fontRegistered = true
-  try {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.angkorai.ai'
-    Font.register({
-      family: 'NotoSansKhmer',
-      fonts: [
-        { src: `${origin}/fonts/NotoSansKhmer-Regular.ttf`, fontWeight: 400 },
-        { src: `${origin}/fonts/NotoSansKhmer-Bold.ttf`, fontWeight: 700 },
-      ],
-    })
-  } catch {
-    // Font registration failed — will use Helvetica fallback
-  }
-}
-
-const PDF_FONT = 'Helvetica'
 
 const styles = StyleSheet.create({
   page: {
     padding: 40,
-    fontFamily: PDF_FONT,
+    fontFamily: 'Helvetica',
     fontSize: 11,
     color: '#1a1a1a',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginBottom: 24,
     paddingBottom: 16,
     borderBottom: '1 solid #e5e5e5',
-  },
-  logo: {
-    width: 32,
-    height: 32,
-    marginRight: 10,
-    borderRadius: 6,
   },
   headerText: {
     fontSize: 18,
@@ -63,14 +31,8 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
   },
-  paragraph: {
-    fontSize: 11,
-    lineHeight: 1.6,
-    marginBottom: 4,
-    color: '#333',
-  },
   bullet: {
-    flexDirection: 'row',
+    flexDirection: 'row' as const,
     marginBottom: 4,
     paddingLeft: 8,
   },
@@ -86,12 +48,12 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   footer: {
-    position: 'absolute',
+    position: 'absolute' as const,
     bottom: 30,
     left: 40,
     right: 40,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
     borderTop: '1 solid #e5e5e5',
     paddingTop: 8,
   },
@@ -115,8 +77,7 @@ function parseSummaryToSections(markdown: string) {
   const sections: { title: string; items: string[] }[] = []
   let currentSection: { title: string; items: string[] } | null = null
 
-  const lines = markdown.split('\n')
-  for (const line of lines) {
+  for (const line of markdown.split('\n')) {
     const trimmed = line.trim()
     if (trimmed.startsWith('### ') || trimmed.startsWith('## ')) {
       if (currentSection) sections.push(currentSection)
@@ -125,7 +86,6 @@ function parseSummaryToSections(markdown: string) {
       const text = trimmed.replace(/^[-*]\s+(\[.\]\s+)?/, '')
       if (text && currentSection) currentSection.items.push(text)
     } else if (trimmed.startsWith('**') && trimmed.includes(':')) {
-      // Bold label like **Duration:** 30 minutes
       const text = trimmed.replace(/\*\*/g, '')
       if (currentSection) currentSection.items.push(text)
     } else if (trimmed && currentSection) {
@@ -133,7 +93,6 @@ function parseSummaryToSections(markdown: string) {
     }
   }
   if (currentSection) sections.push(currentSection)
-
   return sections
 }
 
@@ -149,36 +108,29 @@ function MeetingPdfDocument({ summary, transcript, duration }: {
 
   return createElement(Document, {},
     createElement(Page, { size: 'A4', style: styles.page },
-      // Header
       createElement(View, { style: styles.header },
-        createElement(View, {},
-          createElement(Text, { style: styles.headerText }, 'AngkorAI Meeting Summary'),
-          createElement(Text, { style: styles.headerSub },
-            `${date}${duration > 0 ? ` · ${Math.round(duration / 60)} minutes` : ''}`
-          ),
+        createElement(Text, { style: styles.headerText }, 'AngkorAI Meeting Summary'),
+        createElement(Text, { style: styles.headerSub },
+          `${date}${duration > 0 ? ' - ' + Math.round(duration / 60) + ' minutes' : ''}`
         ),
       ),
-      // Sections
       ...sections.map((section, i) =>
-        createElement(View, { key: i },
+        createElement(View, { key: String(i) },
           createElement(Text, { style: styles.sectionTitle }, section.title),
           ...section.items.map((item, j) =>
-            createElement(View, { key: j, style: styles.bullet },
-              createElement(Text, { style: styles.bulletDot }, '•'),
+            createElement(View, { key: String(j), style: styles.bullet },
+              createElement(Text, { style: styles.bulletDot }, '-'),
               createElement(Text, { style: styles.bulletText }, item),
             )
           ),
         )
       ),
-      // Transcript
-      transcript && createElement(View, { style: styles.transcriptSection },
+      transcript ? createElement(View, { style: styles.transcriptSection },
         createElement(Text, { style: styles.sectionTitle }, 'Full Transcript'),
         createElement(Text, { style: styles.transcriptText }, transcript.slice(0, 3000)),
-        transcript.length > 3000 && createElement(Text, { style: styles.transcriptText }, '... [truncated]'),
-      ),
-      // Footer
+      ) : null,
       createElement(View, { style: styles.footer },
-        createElement(Text, { style: styles.footerText }, 'Generated by AngkorAI · www.angkorai.ai'),
+        createElement(Text, { style: styles.footerText }, 'Generated by AngkorAI - www.angkorai.ai'),
         createElement(Text, { style: styles.footerText }, date),
       ),
     )
@@ -187,7 +139,6 @@ function MeetingPdfDocument({ summary, transcript, duration }: {
 
 export async function generateMeetingPdf(summary: string, transcript: string, duration: number) {
   try {
-    ensureFontsRegistered()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const doc = createElement(MeetingPdfDocument, { summary, transcript, duration }) as any
     const blob = await pdf(doc).toBlob()
@@ -195,7 +146,7 @@ export async function generateMeetingPdf(summary: string, transcript: string, du
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `AngkorAI-Meeting-Summary-${new Date().toISOString().split('T')[0]}.pdf`
+    a.download = `AngkorAI-Meeting-${new Date().toISOString().split('T')[0]}.pdf`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
