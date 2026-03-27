@@ -10,6 +10,8 @@ import {
 } from '@/lib/news'
 
 const DEFAULT_MODEL = process.env.AI_MODEL || "llama-3.3-70b-versatile"
+const CEREBRAS_API_KEY = process.env.CEREBRAS_API_KEY || ""
+const CEREBRAS_MODEL = "qwen-3-235b-a22b-instruct-2507"
 const ANGKOR_LLM_MODEL = process.env.ANGKOR_LLM_MODEL || ""  // e.g. "tiloukim/angkor-llm-7b"
 const RUNPOD_ENDPOINT_ID = process.env.RUNPOD_ENDPOINT_ID || ""
 const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY || ""
@@ -206,14 +208,29 @@ export async function POST(req: NextRequest) {
         })
       }
     } else {
-      // Groq
-      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
-      stream = await groq.chat.completions.create({
-        model,
-        max_tokens: 4096,
-        stream: true,
-        messages: chatMessages,
-      })
+      // Groq (primary) → Cerebras (fallback)
+      try {
+        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+        stream = await groq.chat.completions.create({
+          model,
+          max_tokens: 4096,
+          stream: true,
+          messages: chatMessages,
+        })
+      } catch (groqErr) {
+        console.error('Groq failed, falling back to Cerebras:', groqErr)
+        if (!CEREBRAS_API_KEY) throw groqErr
+        const cerebras = new OpenAI({
+          apiKey: CEREBRAS_API_KEY,
+          baseURL: 'https://api.cerebras.ai/v1',
+        })
+        stream = await cerebras.chat.completions.create({
+          model: CEREBRAS_MODEL,
+          max_tokens: 4096,
+          stream: true,
+          messages: chatMessages,
+        })
+      }
     }
 
     // Collect full response for DB save
