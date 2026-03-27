@@ -1,11 +1,37 @@
-import { pdf } from '@react-pdf/renderer'
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
+import { pdf, Font } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { createElement } from 'react'
+
+// Register Noto Sans Khmer for Khmer script support
+Font.register({
+  family: 'NotoSansKhmer',
+  fonts: [
+    {
+      src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosanskhmer/NotoSansKhmer%5Bwdth%2Cwght%5D.ttf',
+      fontWeight: 'normal',
+    },
+  ],
+})
+
+// Register Noto Sans for Latin + fallback
+Font.register({
+  family: 'NotoSans',
+  fonts: [
+    {
+      src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosans/NotoSans%5Bwdth%2Cwght%5D.ttf',
+      fontWeight: 'normal',
+    },
+    {
+      src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosans/NotoSans%5Bwdth%2Cwght%5D.ttf',
+      fontWeight: 'bold',
+    },
+  ],
+})
 
 const styles = StyleSheet.create({
   page: {
     padding: 40,
-    fontFamily: 'Helvetica',
+    fontFamily: 'NotoSansKhmer',
     fontSize: 11,
     color: '#1a1a1a',
   },
@@ -24,7 +50,8 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 18,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: 'NotoSansKhmer',
+    fontWeight: 'bold' as const,
     color: '#10a37f',
   },
   headerSub: {
@@ -34,7 +61,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 13,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: 'NotoSansKhmer',
+    fontWeight: 'bold' as const,
     color: '#1a1a1a',
     marginTop: 16,
     marginBottom: 8,
