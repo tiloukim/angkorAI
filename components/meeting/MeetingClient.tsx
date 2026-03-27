@@ -41,7 +41,7 @@ export default function MeetingClient({ token, plan }: Props) {
   const [recordingTime, setRecordingTime] = useState(0)
   const [error, setError] = useState('')
   const [showTranscript, setShowTranscript] = useState(false)
-  const [audioLang, setAudioLang] = useState<'en' | 'km'>('en')
+  const [audioLang, setAudioLang] = useState<'auto' | 'en' | 'km'>('auto')
   const [savedMeetings, setSavedMeetings] = useState<SavedMeeting[]>([])
   const [activeMeetingId, setActiveMeetingId] = useState<string | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -192,7 +192,7 @@ export default function MeetingClient({ token, plan }: Props) {
     try {
       const formData = new FormData()
       formData.append('audio', audioBlob, 'recording.webm')
-      formData.append('language', audioLang)
+      if (audioLang !== 'auto') formData.append('language', audioLang)
 
       const transcribeRes = await fetch('/api/transcribe', {
         method: 'POST',
@@ -416,6 +416,14 @@ export default function MeetingClient({ token, plan }: Props) {
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-xs text-gray-500">Audio language:</span>
                   <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+                    <button
+                      onClick={() => setAudioLang('auto')}
+                      className={`px-4 py-1.5 text-xs font-medium transition-colors ${
+                        audioLang === 'auto' ? 'bg-accent text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      Auto
+                    </button>
                     <button
                       onClick={() => setAudioLang('en')}
                       className={`px-4 py-1.5 text-xs font-medium transition-colors ${
