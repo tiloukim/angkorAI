@@ -384,14 +384,7 @@ export default function MeetingClient({ token, plan }: Props) {
             </div>
           </div>
         </>
-      ) : (
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="fixed left-3 top-3.5 z-50 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500"
-        >
-          <PanelLeft size={20} />
-        </button>
-      )}
+      ) : null}
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
