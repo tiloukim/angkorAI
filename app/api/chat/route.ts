@@ -182,16 +182,29 @@ export async function POST(req: NextRequest) {
 
     if (isRunPod) {
       // RunPod vLLM endpoint — OpenAI-compatible API
-      const runpod = new OpenAI({
-        apiKey: RUNPOD_API_KEY,
-        baseURL: `https://api.runpod.ai/v2/${RUNPOD_ENDPOINT_ID}/openai/v1`,
-      })
-      stream = await runpod.chat.completions.create({
-        model: ANGKOR_LLM_MODEL,
-        max_tokens: 2048,
-        stream: true,
-        messages: chatMessages,
-      })
+      // Falls back to Groq if RunPod times out (cold start)
+      try {
+        const runpod = new OpenAI({
+          apiKey: RUNPOD_API_KEY,
+          baseURL: `https://api.runpod.ai/v2/${RUNPOD_ENDPOINT_ID}/openai/v1`,
+          timeout: 30_000, // 30s timeout — cold starts can take longer
+        })
+        stream = await runpod.chat.completions.create({
+          model: ANGKOR_LLM_MODEL,
+          max_tokens: 2048,
+          stream: true,
+          messages: chatMessages,
+        })
+      } catch (runpodErr) {
+        console.error('RunPod failed, falling back to Groq:', runpodErr)
+        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+        stream = await groq.chat.completions.create({
+          model: DEFAULT_MODEL,
+          max_tokens: 4096,
+          stream: true,
+          messages: chatMessages,
+        })
+      }
     } else {
       // Groq
       const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
