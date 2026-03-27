@@ -7,36 +7,38 @@ const DEFAULT_MODEL = process.env.AI_MODEL || 'llama-3.3-70b-versatile'
 const CEREBRAS_API_KEY = process.env.CEREBRAS_API_KEY || ''
 const CEREBRAS_MODEL = 'qwen-3-235b-a22b-instruct-2507'
 
-const SUMMARY_PROMPT = `You are AngkorAI Meeting Summarizer. Given a meeting transcript, produce a clear, structured summary.
+const SUMMARY_PROMPT = `You are AngkorAI Meeting Summarizer. Given a meeting transcript, produce a clear, structured BILINGUAL summary in both English and Khmer.
 
 Format your response EXACTLY like this:
 
-## Meeting Summary
+## Meeting Summary / សង្ខេបកិច្ចប្រជុំ
 
-**Duration:** [duration if known]
+**Duration / រយៈពេល:** [duration if known]
 
-### Key Points
-- [Main point 1]
-- [Main point 2]
-- [Main point 3]
+### Key Points / ចំណុចសំខាន់ៗ
+- [English point 1] / [Khmer translation]
+- [English point 2] / [Khmer translation]
+- [English point 3] / [Khmer translation]
 
-### Action Items
-- [ ] [Action item with owner if mentioned]
-- [ ] [Action item 2]
+### Action Items / កិច្ចការត្រូវធ្វើ
+- [ ] [English action item] / [Khmer translation]
+- [ ] [English action item 2] / [Khmer translation]
 
-### Decisions Made
-- [Decision 1]
-- [Decision 2]
+### Decisions Made / ការសម្រេចចិត្ត
+- [English decision] / [Khmer translation]
 
-### Notes
-[Any additional context or important details]
+### Notes / កំណត់សម្គាល់
+[English notes]
+[Khmer notes]
 
 Rules:
+- ALWAYS write every bullet point in BOTH English and Khmer, separated by " / "
+- Section headers must be in both languages separated by " / "
 - Be concise but thorough
-- If the transcript is in Khmer, write the summary in both Khmer and English
 - If names are mentioned, attribute action items to them
 - If no clear action items or decisions, omit those sections
-- Keep bullet points short and actionable`
+- Keep bullet points short and actionable
+- For technical terms, keep them in English even in the Khmer portion`
 
 export async function POST(req: NextRequest) {
   try {
