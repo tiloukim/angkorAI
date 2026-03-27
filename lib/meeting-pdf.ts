@@ -7,26 +7,18 @@ Font.register({
   family: 'NotoSansKhmer',
   fonts: [
     {
-      src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosanskhmer/NotoSansKhmer%5Bwdth%2Cwght%5D.ttf',
-      fontWeight: 'normal',
+      src: 'https://fonts.gstatic.com/s/notosanskhmer/v24/ijw3s5roRME5LLRxjsRb-gssOenAyendxrgV2c-Zw-9vbVUti_Z_dNSzwE.ttf',
+      fontWeight: 400,
+    },
+    {
+      src: 'https://fonts.gstatic.com/s/notosanskhmer/v24/ijw3s5roRME5LLRxjsRb-gssOenAyendxrgV2c-Zw-9vbVUti_Z_dWizwE.ttf',
+      fontWeight: 700,
     },
   ],
 })
 
-// Register Noto Sans for Latin + fallback
-Font.register({
-  family: 'NotoSans',
-  fonts: [
-    {
-      src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosans/NotoSans%5Bwdth%2Cwght%5D.ttf',
-      fontWeight: 'normal',
-    },
-    {
-      src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosans/NotoSans%5Bwdth%2Cwght%5D.ttf',
-      fontWeight: 'bold',
-    },
-  ],
-})
+// Disable hyphenation (causes issues with Khmer)
+Font.registerHyphenationCallback((word) => [word])
 
 const styles = StyleSheet.create({
   page: {
@@ -190,16 +182,21 @@ function MeetingPdfDocument({ summary, transcript, duration }: {
 }
 
 export async function generateMeetingPdf(summary: string, transcript: string, duration: number) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const doc = createElement(MeetingPdfDocument, { summary, transcript, duration }) as any
-  const blob = await pdf(doc).toBlob()
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const doc = createElement(MeetingPdfDocument, { summary, transcript, duration }) as any
+    const blob = await pdf(doc).toBlob()
 
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `AngkorAI-Meeting-Summary-${new Date().toISOString().split('T')[0]}.pdf`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `AngkorAI-Meeting-Summary-${new Date().toISOString().split('T')[0]}.pdf`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error('PDF generation failed:', err)
+    alert('PDF export failed. Try copying the summary instead.')
+  }
 }
