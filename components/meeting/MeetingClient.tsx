@@ -54,42 +54,52 @@ export default function MeetingClient({ token, plan }: Props) {
 
   const maxDuration = plan === 'free' ? 5 * 60 : 60 * 60
 
-  // Load saved meetings on mount and when window regains focus
+  // Auth headers — cookies handle web auth, Bearer token as backup
+  const authHeaders = (): HeadersInit => {
+    const h: HeadersInit = {}
+    if (token) h['Authorization'] = `Bearer ${token}`
+    return h
+  }
+
+  // Load saved meetings on mount, on focus, and every 30s
   useEffect(() => {
     fetchMeetings()
     const onFocus = () => fetchMeetings()
+    const interval = setInterval(fetchMeetings, 30000)
     window.addEventListener('focus', onFocus)
-    return () => window.removeEventListener('focus', onFocus)
+    return () => {
+      window.removeEventListener('focus', onFocus)
+      clearInterval(interval)
+    }
   }, [token])
 
   const fetchMeetings = async () => {
     try {
       const res = await fetch('/api/meetings', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: authHeaders(),
         credentials: 'include',
       })
       if (res.ok) {
         const data = await res.json()
         setSavedMeetings(data)
+      } else {
+        console.error('Meetings fetch failed:', res.status)
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Meetings fetch error:', err)
     }
   }
 
   const saveMeeting = async (summaryText: string, transcriptText: string, dur: number) => {
     setSaving(true)
     try {
-      // Generate title from first line of summary
       const firstLine = summaryText.split('\n').find(l => l.trim() && !l.startsWith('#'))?.trim() || 'Untitled Meeting'
       const title = firstLine.slice(0, 80)
 
       const res = await fetch('/api/meetings', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ title, transcript: transcriptText, summary: summaryText, duration: dur }),
       })
       if (res.ok) {
@@ -106,7 +116,8 @@ export default function MeetingClient({ token, plan }: Props) {
   const loadMeeting = async (id: string) => {
     try {
       const res = await fetch(`/api/meetings/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: authHeaders(),
+        credentials: 'include',
       })
       if (res.ok) {
         const data: MeetingDetail = await res.json()
@@ -127,7 +138,8 @@ export default function MeetingClient({ token, plan }: Props) {
     try {
       await fetch(`/api/meetings/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: authHeaders(),
+        credentials: 'include',
       })
       setSavedMeetings(prev => prev.filter(m => m.id !== id))
       if (activeMeetingId === id) reset()
@@ -200,7 +212,8 @@ export default function MeetingClient({ token, plan }: Props) {
 
       const transcribeRes = await fetch('/api/transcribe', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: authHeaders(),
+        credentials: 'include',
         body: formData,
       })
 
@@ -216,10 +229,8 @@ export default function MeetingClient({ token, plan }: Props) {
       setPhase('summarizing')
       const summarizeRes = await fetch('/api/summarize', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ transcript: text, duration: dur }),
       })
 
