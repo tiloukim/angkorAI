@@ -2,12 +2,19 @@ import { NextRequest } from 'next/server'
 import Groq from 'groq-sdk'
 import { getAuthUser } from '@/lib/supabase/server'
 
+// Allow larger audio uploads (up to 10MB)
+export const config = {
+  api: { bodyParser: false },
+}
+
+export const maxDuration = 60 // Allow up to 60s for transcription
+
 const GOOGLE_API_KEY = process.env.GOOGLE_TTS_API_KEY || ''
 
 async function transcribeWithGoogle(audioBuffer: ArrayBuffer): Promise<{ text: string; duration?: number }> {
   const base64Audio = Buffer.from(audioBuffer).toString('base64')
 
-  // Use v1p1beta1 for enhanced model + longer audio support
+  // Use v1p1beta1 for enhanced Khmer support
   const res = await fetch(
     `https://speech.googleapis.com/v1p1beta1/speech:recognize?key=${GOOGLE_API_KEY}`,
     {
@@ -21,6 +28,7 @@ async function transcribeWithGoogle(audioBuffer: ArrayBuffer): Promise<{ text: s
           alternativeLanguageCodes: ['en-US'],
           model: 'default',
           enableAutomaticPunctuation: true,
+          enableWordTimeOffsets: true,
         },
         audio: { content: base64Audio },
       }),
