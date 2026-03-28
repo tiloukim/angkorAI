@@ -13,7 +13,7 @@ async function requirePro(req: NextRequest) {
     .select('plan')
     .eq('id', user.id)
     .single()
-  if (!profile || profile.plan === 'free') return { error: 'Pro plan required for video generation', status: 403 }
+  if (!profile || profile.plan === 'free' || profile.plan === 'edu') return { error: 'Video generation requires a Pro plan. Upgrade to Pro to unlock AI video creation!', status: 403 }
   return null
 }
 

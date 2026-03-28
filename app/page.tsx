@@ -40,6 +40,23 @@ export default function LandingPage() {
         </div>
       </nav>
 
+      {/* Announcement Banner */}
+      <div className="bg-blue-600/90 text-white text-center py-3 px-6">
+        <p className="text-sm font-medium">
+          {kh ? (
+            <span className="font-khmer">
+              🎓 សិស្ស គ្រូបង្រៀន និងមន្ត្រីរាជការ ប្រើ AngkorAI <strong>ឥតគិតថ្លៃ</strong>!{' '}
+              <Link href="/signup/edu" className="underline font-bold">ចុះឈ្មោះឥឡូវនេះ →</Link>
+            </span>
+          ) : (
+            <>
+              🎓 Students, Teachers & Government Workers — use AngkorAI <strong>FREE</strong> with extra benefits!{' '}
+              <Link href="/signup/edu" className="underline font-bold">Sign up now →</Link>
+            </>
+          )}
+        </p>
+      </div>
+
       {/* Hero */}
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20">
         <div className="inline-flex items-center gap-2 bg-accent/10 border border-accent/30 rounded-full px-4 py-1.5 text-accent text-sm mb-8">
@@ -127,18 +144,39 @@ export default function LandingPage() {
             {kh ? 'ចាប់ផ្តើមឥតគិតថ្លៃ។ ធ្វើឱ្យប្រសើរនៅពេលត្រូវការ។' : 'Start free. Upgrade when you need more.'}
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[
               {
                 name: 'Free',
                 nameKh: 'ឥតគិតថ្លៃ',
                 price: '$0',
                 period: '',
-                limit: '30 messages/day',
-                limitKh: '៣០ សារ / ថ្ងៃ',
+                limit: '100 messages/day',
+                limitKh: '១០០ សារ / ថ្ងៃ',
+                features: [],
+                featuresKh: [],
                 cta: 'Get started',
                 ctaKh: 'ចាប់ផ្តើម',
+                href: '/signup',
                 highlight: false,
+                badge: '',
+                badgeKh: '',
+              },
+              {
+                name: 'Education',
+                nameKh: 'អប់រំ',
+                price: '$0',
+                period: '',
+                limit: '200 messages/day',
+                limitKh: '២០០ សារ / ថ្ងៃ',
+                features: ['5 AI images/day', 'For students, teachers & gov\'t'],
+                featuresKh: ['៥ រូបភាព AI/ថ្ងៃ', 'សម្រាប់សិស្ស គ្រូ និងមន្ត្រីរាជការ'],
+                cta: 'Apply free',
+                ctaKh: 'ចុះឈ្មោះឥតគិតថ្លៃ',
+                href: '/signup/edu',
+                highlight: false,
+                badge: '🎓 Free',
+                badgeKh: '🎓 ឥតគិតថ្លៃ',
               },
               {
                 name: 'Pro',
@@ -147,9 +185,14 @@ export default function LandingPage() {
                 period: '/month',
                 limit: '1,000 messages/day',
                 limitKh: '១,០០០ សារ / ថ្ងៃ',
+                features: ['Unlimited images', 'AI video generation'],
+                featuresKh: ['រូបភាពគ្មានដែនកំណត់', 'បង្កើតវីដេអូ AI'],
                 cta: 'Upgrade to Pro',
                 ctaKh: 'ធ្វើឱ្យប្រសើរ → ប្រូ',
+                href: '/signup',
                 highlight: true,
+                badge: 'Most Popular',
+                badgeKh: 'ពេញនិយមបំផុត',
               },
               {
                 name: 'Business',
@@ -158,9 +201,14 @@ export default function LandingPage() {
                 period: '/month',
                 limit: 'Unlimited messages',
                 limitKh: 'សារគ្មានដែនកំណត់',
+                features: ['Everything in Pro', 'Priority support'],
+                featuresKh: ['អ្វីគ្រប់យ៉ាងក្នុង Pro', 'ជំនួយអាទិភាព'],
                 cta: 'Contact us',
                 ctaKh: 'ទាក់ទងមក',
+                href: '/signup',
                 highlight: false,
+                badge: '',
+                badgeKh: '',
               },
             ].map((plan) => (
               <div
@@ -171,19 +219,27 @@ export default function LandingPage() {
                     : 'bg-[#171717] border-white/10'
                 }`}
               >
-                {plan.highlight && (
-                  <span className="text-xs bg-accent text-white px-2 py-0.5 rounded-full font-medium mb-3 inline-block">
-                    {kh ? 'ពេញនិយមបំផុត' : 'Most Popular'}
+                {plan.badge && (
+                  <span className={`text-xs ${plan.highlight ? 'bg-accent' : 'bg-blue-500'} text-white px-2 py-0.5 rounded-full font-medium mb-3 inline-block`}>
+                    {kh ? plan.badgeKh : plan.badge}
                   </span>
                 )}
                 <h3 className={`text-xl font-bold ${kh ? 'font-khmer' : ''}`}>{kh ? plan.nameKh : plan.name}</h3>
-                <div className="mb-4 mt-3">
+                <div className="mb-2 mt-3">
                   <span className="text-3xl font-bold">{plan.price}</span>
                   <span className="text-gray-400 text-sm">{kh && plan.period ? '/ខែ' : plan.period}</span>
                 </div>
-                <p className={`text-sm text-gray-300 mb-6 ${kh ? 'font-khmer' : ''}`}>{kh ? plan.limitKh : plan.limit}</p>
+                <p className={`text-sm text-gray-300 ${kh ? 'font-khmer' : ''}`}>{kh ? plan.limitKh : plan.limit}</p>
+                {plan.features.length > 0 && (
+                  <ul className={`text-xs text-gray-400 mt-2 mb-4 space-y-1 ${kh ? 'font-khmer' : ''}`}>
+                    {(kh ? plan.featuresKh : plan.features).map((f) => (
+                      <li key={f}>✓ {f}</li>
+                    ))}
+                  </ul>
+                )}
+                {plan.features.length === 0 && <div className="mb-6" />}
                 <Link
-                  href="/signup"
+                  href={plan.href}
                   className={`block text-center py-2.5 rounded-xl text-sm font-semibold transition-colors ${
                     plan.highlight
                       ? 'bg-accent hover:bg-accent-hover text-white'

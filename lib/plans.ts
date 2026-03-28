@@ -1,8 +1,16 @@
-export type Plan = 'free' | 'pro' | 'business'
+export type Plan = 'free' | 'edu' | 'pro' | 'business'
 
 export const PLAN_LIMITS: Record<Plan, number> = {
   free: 100,
+  edu: 200,
   pro: 1000,
+  business: Infinity,
+}
+
+export const IMAGE_LIMITS: Record<Plan, number> = {
+  free: 0,
+  edu: 5,
+  pro: Infinity,
   business: Infinity,
 }
 
@@ -16,6 +24,16 @@ export const PLAN_DETAILS = {
     descriptionKh: '១០០ សារក្នុងមួយថ្ងៃ',
     color: 'text-gray-400',
     badge: 'bg-gray-700 text-gray-300',
+  },
+  edu: {
+    name: 'Education',
+    nameKh: 'អប់រំ',
+    price: 0,
+    limit: 200,
+    description: '200 messages/day + 5 images/day',
+    descriptionKh: '២០០ សារ/ថ្ងៃ + ៥ រូបភាព/ថ្ងៃ',
+    color: 'text-blue-400',
+    badge: 'bg-blue-500/20 text-blue-300',
   },
   pro: {
     name: 'Pro',

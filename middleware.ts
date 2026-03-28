@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect logged-in users away from auth pages
-  if ((pathname === '/login' || pathname === '/signup') && user) {
+  if ((pathname === '/login' || pathname === '/signup' || pathname === '/signup/edu') && user) {
     return NextResponse.redirect(new URL('/chat', request.url))
   }
 

@@ -72,10 +72,26 @@ Video Generation:
 - Note: Video generation takes about 1-2 minutes to complete
 - After the video tag, add a short bilingual description`
 
+const EDU_MEDIA_MSG = `
+Image Generation:
+- You can generate images! Education plan users get 5 image generations per day.
+- Use this EXACT format to generate an image: ![image](POLLINATIONS:detailed english prompt here)
+- The prompt after POLLINATIONS: should be a detailed, descriptive English prompt for the image (even if the user asked in Khmer)
+- Always write the prompt in English for best image quality
+- Make the prompt detailed and descriptive for better results
+- After the image tag, add a short bilingual description
+- If the user has reached their daily image limit, let them know they can upgrade to Pro for unlimited images.
+
+Video Generation:
+- Video generation is a Pro feature. If an Education plan user asks to generate a video, politely let them know: "Video generation is available for Pro users! Upgrade to Pro to unlock AI video creation. 🎬"
+- Respond in both English and Khmer as usual.`
+
 const FREE_MEDIA_MSG = `
 Image & Video Generation:
-- Image and video generation is a Pro feature. If a free user asks to generate an image, video, or animation, politely let them know this is available on the Pro plan.
-- Say something like: "Image and video generation is available for Pro users! Upgrade your plan to unlock AI-powered image and video creation. 🎨🎬"
+- Image and video generation requires an Education or Pro plan.
+- If a free user asks to generate an image, video, or animation, politely let them know:
+  "Image generation is free for students, teachers, and government workers on the Education plan! Or upgrade to Pro for unlimited images and video creation. 🎨🎬"
+- Mention the Education plan signup at /signup/edu
 - Respond in both English and Khmer as usual.`
 
 export async function POST(req: NextRequest) {
@@ -172,7 +188,7 @@ export async function POST(req: NextRequest) {
 
     // Detect news queries and inject live headlines
     const lastUserText = flatMessages.filter((m: { role: string; content: string }) => m.role === 'user').pop()?.content ?? ''
-    const mediaInstructions = plan === 'free' ? FREE_MEDIA_MSG : MEDIA_PROMPT
+    const mediaInstructions = plan === 'free' ? FREE_MEDIA_MSG : plan === 'edu' ? EDU_MEDIA_MSG : MEDIA_PROMPT
     let systemContent = hasImage
       ? SYSTEM_PROMPT + mediaInstructions + '\n\n[The user attached an image to this message. Acknowledge it and respond to any text they wrote.]'
       : SYSTEM_PROMPT + mediaInstructions
