@@ -32,11 +32,18 @@ export default async function AdminPage() {
     .eq('id', 1)
     .single()
 
+  // Fetch pending edu applications count
+  const { count: pendingEduCount } = await service
+    .from('edu_applications')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'pending')
+
   return (
     <AdminDashboard
       userId={user.id}
       supportChats={chats ?? []}
       initialOnline={presence?.is_online ?? false}
+      pendingEduCount={pendingEduCount ?? 0}
     />
   )
 }

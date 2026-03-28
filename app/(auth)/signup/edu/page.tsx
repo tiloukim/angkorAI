@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { GraduationCap, Loader2, Check } from 'lucide-react'
+import { GraduationCap, Loader2, Check, Upload, X } from 'lucide-react'
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 
 type Role = 'student' | 'teacher' | 'government'
@@ -17,10 +17,37 @@ export default function EduSignupPage() {
   const [password, setPassword] = useState('')
   const [role, setRole] = useState<Role>('student')
   const [institution, setInstitution] = useState('')
+  const [idFile, setIdFile] = useState<File | null>(null)
+  const [idPreview, setIdPreview] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [captchaToken, setCaptchaToken] = useState('')
   const turnstileRef = useRef<TurnstileInstance>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File too large. Maximum 5MB.')
+      return
+    }
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload an image file (JPG, PNG, etc.)')
+      return
+    }
+    setIdFile(file)
+    setError('')
+    const reader = new FileReader()
+    reader.onload = () => setIdPreview(reader.result as string)
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
+  function removeFile() {
+    setIdFile(null)
+    setIdPreview(null)
+  }
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
@@ -28,6 +55,11 @@ export default function EduSignupPage() {
 
     if (!institution.trim()) {
       setError('Please enter your school or institution name.')
+      return
+    }
+
+    if (!idFile) {
+      setError('Please upload your student/teacher/government ID for verification.')
       return
     }
 
@@ -57,42 +89,72 @@ export default function EduSignupPage() {
       return
     }
 
-    // Set plan to 'edu' in profiles
-    if (data.user) {
-      const { createClient: createServiceClient } = await import('@/lib/supabase/client')
-      const supa = createServiceClient()
-      await supa.from('profiles').upsert(
-        { id: data.user.id, plan: 'edu' },
-        { onConflict: 'id' }
-      )
+    if (!data.user) {
+      setError('Account creation failed. Please try again.')
+      setLoading(false)
+      return
     }
+
+    // Upload ID to Supabase Storage
+    const ext = idFile.name.split('.').pop() || 'jpg'
+    const filePath = `${data.user.id}/id.${ext}`
+    const { error: uploadErr } = await supabase.storage
+      .from('edu-ids')
+      .upload(filePath, idFile, { upsert: true })
+
+    if (uploadErr) {
+      console.error('ID upload error:', uploadErr)
+      setError('Failed to upload ID. Please try again.')
+      setLoading(false)
+      return
+    }
+
+    // Set plan to 'pending_edu' and create application record
+    await supabase.from('profiles').upsert(
+      { id: data.user.id, plan: 'pending_edu' },
+      { onConflict: 'id' }
+    )
+
+    await supabase.from('edu_applications').insert({
+      user_id: data.user.id,
+      email,
+      role,
+      institution: institution.trim(),
+      id_file_path: filePath,
+      status: 'pending',
+    })
 
     setSuccess(true)
     setLoading(false)
-    setTimeout(() => router.push('/chat'), 2000)
+    setTimeout(() => router.push('/chat'), 3000)
   }
 
   if (success) {
     return (
       <div className="min-h-screen bg-[#212121] flex items-center justify-center px-4">
         <div className="w-full max-w-sm text-center">
-          <div className="w-16 h-16 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mx-auto mb-4">
-            <Check size={28} className="text-blue-400" />
+          <div className="w-16 h-16 rounded-full bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center mx-auto mb-4">
+            <Check size={28} className="text-yellow-400" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Welcome to AngkorAI! 🎓</h2>
-          <p className="text-gray-400 text-sm mb-1">Your Education plan is active. Redirecting...</p>
-          <p className="font-khmer text-gray-500 text-xs">គម្រោងអប់រំរបស់អ្នកបានដំណើរការ។ កំពុងបញ្ជូន...</p>
+          <h2 className="text-2xl font-bold text-white mb-2">Application Submitted! 🎓</h2>
+          <p className="text-gray-400 text-sm mb-1">
+            Your ID is being reviewed. You&apos;ll be upgraded to the Education plan once approved.
+          </p>
+          <p className="font-khmer text-gray-500 text-xs mt-1">
+            អត្តសញ្ញាណប័ណ្ណរបស់អ្នកកំពុងត្រូវបានពិនិត្យ។ អ្នកនឹងត្រូវបានដំឡើងទៅគម្រោងអប់រំនៅពេលត្រូវបានអនុម័ត។
+          </p>
+          <p className="text-gray-500 text-xs mt-3">You can use the free plan while waiting. Redirecting...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#212121] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#212121] flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm">
 
         {/* Header */}
-        <div className="flex flex-col items-center mb-8">
+        <div className="flex flex-col items-center mb-6">
           <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center mb-4">
             <GraduationCap size={18} className="text-white" />
           </div>
@@ -108,7 +170,7 @@ export default function EduSignupPage() {
 
         {/* Benefits */}
         <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-6 text-sm">
-          <p className="text-blue-300 font-medium mb-2">Your free benefits:</p>
+          <p className="text-blue-300 font-medium mb-2">Your free benefits / អត្ថប្រយោជន៍ឥតគិតថ្លៃ:</p>
           <ul className="text-gray-300 space-y-1 text-xs">
             <li>✓ 200 messages per day (2x free plan)</li>
             <li>✓ 5 AI image generations per day</li>
@@ -159,6 +221,48 @@ export default function EduSignupPage() {
             />
           </div>
 
+          {/* ID Upload */}
+          <div>
+            <label className="block text-sm text-gray-300 mb-1.5">
+              {role === 'student' ? 'Student ID' : role === 'teacher' ? 'Teacher ID' : 'Government ID'} / អត្តសញ្ញាណប័ណ្ណ
+            </label>
+            <p className="text-xs text-gray-500 mb-2">Upload a photo of your ID for verification</p>
+            {idPreview ? (
+              <div className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={idPreview}
+                  alt="ID preview"
+                  className="w-full h-40 object-cover rounded-xl border border-white/15"
+                />
+                <button
+                  type="button"
+                  onClick={removeFile}
+                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center transition-colors"
+                >
+                  <X size={14} className="text-white" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="w-full bg-[#171717] border border-dashed border-white/20 hover:border-blue-500/50 rounded-xl px-4 py-6 text-center transition-colors group"
+              >
+                <Upload size={24} className="mx-auto text-gray-500 group-hover:text-blue-400 mb-2" />
+                <p className="text-sm text-gray-400 group-hover:text-gray-300">Click to upload ID photo</p>
+                <p className="text-xs text-gray-600 mt-1">JPG, PNG — Max 5MB</p>
+              </button>
+            )}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+          </div>
+
           {/* Email */}
           <div>
             <label className="block text-sm text-gray-300 mb-1.5">Email</label>
@@ -204,8 +308,12 @@ export default function EduSignupPage() {
             className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <GraduationCap size={16} />}
-            {loading ? 'Creating account...' : 'Create Education Account'}
+            {loading ? 'Submitting application...' : 'Submit Application'}
           </button>
+
+          <p className="text-center text-gray-600 text-xs">
+            Your ID will be reviewed by our team. You can use the free plan while waiting for approval.
+          </p>
         </form>
 
         <p className="text-center text-gray-400 text-sm mt-4">

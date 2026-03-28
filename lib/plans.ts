@@ -1,7 +1,8 @@
-export type Plan = 'free' | 'edu' | 'pro' | 'business'
+export type Plan = 'free' | 'pending_edu' | 'edu' | 'pro' | 'business'
 
 export const PLAN_LIMITS: Record<Plan, number> = {
   free: 100,
+  pending_edu: 100,
   edu: 200,
   pro: 1000,
   business: Infinity,
@@ -9,6 +10,7 @@ export const PLAN_LIMITS: Record<Plan, number> = {
 
 export const IMAGE_LIMITS: Record<Plan, number> = {
   free: 0,
+  pending_edu: 0,
   edu: 5,
   pro: Infinity,
   business: Infinity,
@@ -24,6 +26,16 @@ export const PLAN_DETAILS = {
     descriptionKh: '១០០ សារក្នុងមួយថ្ងៃ',
     color: 'text-gray-400',
     badge: 'bg-gray-700 text-gray-300',
+  },
+  pending_edu: {
+    name: 'Education (Pending)',
+    nameKh: 'អប់រំ (កំពុងរង់ចាំ)',
+    price: 0,
+    limit: 100,
+    description: 'Pending verification — 100 messages/day',
+    descriptionKh: 'កំពុងរង់ចាំផ្ទៀងផ្ទាត់ — ១០០ សារ/ថ្ងៃ',
+    color: 'text-yellow-400',
+    badge: 'bg-yellow-500/20 text-yellow-300',
   },
   edu: {
     name: 'Education',
