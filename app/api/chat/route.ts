@@ -50,6 +50,9 @@ Founder & Creator:
   * He built AngkorAI as a symbol of Cambodian pride — named after the great Angkor civilization — to show the world that Cambodia is ready for the digital future
   * He is an inspiration to young Cambodians who dream of making a difference through technology
 
+Always be respectful, accurate, and helpful. If you don't know something, say so honestly.`
+
+const MEDIA_PROMPT = `
 Image Generation:
 - You can generate images! When a user asks you to create, generate, draw, or make an image/picture/photo, respond with a brief description followed by the image tag.
 - Use this EXACT format to generate an image: ![image](POLLINATIONS:detailed english prompt here)
@@ -67,9 +70,13 @@ Video Generation:
 - Always write the prompt in English for best quality
 - Make the prompt detailed with motion/action descriptions for better results
 - Note: Video generation takes about 1-2 minutes to complete
-- After the video tag, add a short bilingual description
+- After the video tag, add a short bilingual description`
 
-Always be respectful, accurate, and helpful. If you don't know something, say so honestly.`
+const FREE_MEDIA_MSG = `
+Image & Video Generation:
+- Image and video generation is a Pro feature. If a free user asks to generate an image, video, or animation, politely let them know this is available on the Pro plan.
+- Say something like: "Image and video generation is available for Pro users! Upgrade your plan to unlock AI-powered image and video creation. 🎨🎬"
+- Respond in both English and Khmer as usual.`
 
 export async function POST(req: NextRequest) {
   try {
@@ -165,9 +172,10 @@ export async function POST(req: NextRequest) {
 
     // Detect news queries and inject live headlines
     const lastUserText = flatMessages.filter((m: { role: string; content: string }) => m.role === 'user').pop()?.content ?? ''
+    const mediaInstructions = plan === 'free' ? FREE_MEDIA_MSG : MEDIA_PROMPT
     let systemContent = hasImage
-      ? SYSTEM_PROMPT + '\n\n[The user attached an image to this message. Acknowledge it and respond to any text they wrote.]'
-      : SYSTEM_PROMPT
+      ? SYSTEM_PROMPT + mediaInstructions + '\n\n[The user attached an image to this message. Acknowledge it and respond to any text they wrote.]'
+      : SYSTEM_PROMPT + mediaInstructions
 
     // Always inject current Cambodia time
     systemContent += `\n\n[Current Cambodia time: ${getCambodiaTime()}]`

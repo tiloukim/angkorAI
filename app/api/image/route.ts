@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getAuthUser, createServiceClient } from '@/lib/supabase/server'
 
 export async function GET(req: NextRequest) {
+  const user = await getAuthUser(req)
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const supabase = await createServiceClient()
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || profile.plan === 'free') {
+    return NextResponse.json({ error: 'Pro plan required for image generation' }, { status: 403 })
+  }
+
   const prompt = req.nextUrl.searchParams.get('prompt')
   if (!prompt) {
     return NextResponse.json({ error: 'Missing prompt' }, { status: 400 })

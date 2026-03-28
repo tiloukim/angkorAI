@@ -1,9 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getAuthUser, createServiceClient } from '@/lib/supabase/server'
 
 const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY || ''
 const VIDEO_MODEL = 'wan-video/wan-2.1-1.3b'
 
+async function requirePro(req: NextRequest) {
+  const user = await getAuthUser(req)
+  if (!user) return { error: 'Unauthorized', status: 401 }
+  const supabase = await createServiceClient()
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', user.id)
+    .single()
+  if (!profile || profile.plan === 'free') return { error: 'Pro plan required for video generation', status: 403 }
+  return null
+}
+
 export async function POST(req: NextRequest) {
+  const denied = await requirePro(req)
+  if (denied) return NextResponse.json({ error: denied.error }, { status: denied.status })
+
   const { prompt } = await req.json()
   if (!prompt) {
     return NextResponse.json({ error: 'Missing prompt' }, { status: 400 })
