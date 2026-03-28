@@ -95,34 +95,25 @@ export default function EduSignupPage() {
       return
     }
 
-    // Upload ID to Supabase Storage
-    const ext = idFile.name.split('.').pop() || 'jpg'
-    const filePath = `${data.user.id}/id.${ext}`
-    const { error: uploadErr } = await supabase.storage
-      .from('edu-ids')
-      .upload(filePath, idFile, { upsert: true })
+    // Upload ID and create application via server API (uses service role)
+    const formData = new FormData()
+    formData.append('user_id', data.user.id)
+    formData.append('email', email)
+    formData.append('role', role)
+    formData.append('institution', institution.trim())
+    formData.append('id_file', idFile)
 
-    if (uploadErr) {
-      console.error('ID upload error:', uploadErr)
-      setError('Failed to upload ID. Please try again.')
+    const applyRes = await fetch('/api/edu-apply', {
+      method: 'POST',
+      body: formData,
+    })
+
+    if (!applyRes.ok) {
+      const err = await applyRes.json().catch(() => ({}))
+      setError(err.error || 'Failed to submit application. Please try again.')
       setLoading(false)
       return
     }
-
-    // Set plan to 'pending_edu' and create application record
-    await supabase.from('profiles').upsert(
-      { id: data.user.id, plan: 'pending_edu' },
-      { onConflict: 'id' }
-    )
-
-    await supabase.from('edu_applications').insert({
-      user_id: data.user.id,
-      email,
-      role,
-      institution: institution.trim(),
-      id_file_path: filePath,
-      status: 'pending',
-    })
 
     setSuccess(true)
     setLoading(false)
