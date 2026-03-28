@@ -32,19 +32,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  // Generate signed URLs for ID images
-  const appsWithUrls = await Promise.all(
-    (apps ?? []).map(async (app) => {
-      let idUrl = null
-      if (app.id_file_path) {
-        const { data } = await supabase.storage
-          .from('edu-ids')
-          .createSignedUrl(app.id_file_path, 3600)
-        idUrl = data?.signedUrl ?? null
-      }
-      return { ...app, id_url: idUrl }
-    })
-  )
+  // Generate URLs for ID images
+  const appsWithUrls = (apps ?? []).map((app) => {
+    let idUrl = null
+    if (app.id_file_path) {
+      const { data } = supabase.storage
+        .from('edu-ids')
+        .getPublicUrl(app.id_file_path)
+      idUrl = data?.publicUrl ?? null
+    }
+    return { ...app, id_url: idUrl }
+  })
 
   return NextResponse.json({ applications: appsWithUrls })
 }
