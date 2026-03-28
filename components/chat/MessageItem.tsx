@@ -125,6 +125,7 @@ export default function MessageItem({ message, lang, token }: Props) {
             <div className={`prose-chat text-sm ${lang === 'kh' ? 'font-khmer' : ''} ${message.streaming ? 'cursor-blink' : ''}`}>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
+                urlTransform={(url) => url}
                 components={{
                   img: ({ src, alt }) => {
                     const srcStr = typeof src === 'string' ? src : ''
