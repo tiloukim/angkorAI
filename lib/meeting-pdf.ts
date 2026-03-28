@@ -17,6 +17,7 @@ export async function generateMeetingPdf(summary: string, transcript: string, du
     .replace(/^- \[x\] (.+)$/gm, '<p style="margin:3px 0 3px 16px">☑ $1</p>')
     .replace(/^- (.+)$/gm, '<p style="margin:3px 0 3px 16px">• $1</p>')
     .replace(/^\* (.+)$/gm, '<p style="margin:3px 0 3px 16px">• $1</p>')
+    .replace(/^  (.+)$/gm, '<p style="margin:1px 0 6px 20px;color:#444;font-size:11px">$1</p>')
     .replace(/\n\n/g, '<br/>')
 
   const printContent = `
@@ -107,10 +108,14 @@ export async function generateMeetingPdf(summary: string, transcript: string, du
   printWindow.document.write(printContent)
   printWindow.document.close()
 
-  // Wait for fonts to load, then print
+  // Wait for Khmer font to fully load, then print
   printWindow.onload = () => {
-    setTimeout(() => {
-      printWindow.print()
-    }, 500)
+    if (printWindow.document.fonts) {
+      printWindow.document.fonts.ready.then(() => {
+        setTimeout(() => printWindow.print(), 300)
+      })
+    } else {
+      setTimeout(() => printWindow.print(), 1500)
+    }
   }
 }
