@@ -213,34 +213,35 @@ export default function LandingPage() {
             ].map((plan) => (
               <div
                 key={plan.name}
-                className={`rounded-2xl p-6 text-left border ${
+                className={`rounded-2xl p-6 text-left border flex flex-col ${
                   plan.highlight
                     ? 'bg-accent/10 border-accent shadow-lg shadow-accent/10'
                     : 'bg-[#171717] border-white/10'
                 }`}
               >
-                {plan.badge && (
-                  <span className={`text-xs ${plan.highlight ? 'bg-accent' : 'bg-blue-500'} text-white px-2 py-0.5 rounded-full font-medium mb-3 inline-block`}>
-                    {kh ? plan.badgeKh : plan.badge}
-                  </span>
-                )}
-                <h3 className={`text-xl font-bold ${kh ? 'font-khmer' : ''}`}>{kh ? plan.nameKh : plan.name}</h3>
-                <div className="mb-2 mt-3">
-                  <span className="text-3xl font-bold">{plan.price}</span>
-                  <span className="text-gray-400 text-sm">{kh && plan.period ? '/ខែ' : plan.period}</span>
+                <div className="flex-1">
+                  {plan.badge && (
+                    <span className={`text-xs ${plan.highlight ? 'bg-accent' : 'bg-blue-500'} text-white px-2 py-0.5 rounded-full font-medium mb-3 inline-block`}>
+                      {kh ? plan.badgeKh : plan.badge}
+                    </span>
+                  )}
+                  <h3 className={`text-xl font-bold ${kh ? 'font-khmer' : ''}`}>{kh ? plan.nameKh : plan.name}</h3>
+                  <div className="mb-2 mt-3">
+                    <span className="text-3xl font-bold">{plan.price}</span>
+                    <span className="text-gray-400 text-sm">{kh && plan.period ? '/ខែ' : plan.period}</span>
+                  </div>
+                  <p className={`text-sm text-gray-300 ${kh ? 'font-khmer' : ''}`}>{kh ? plan.limitKh : plan.limit}</p>
+                  {plan.features.length > 0 && (
+                    <ul className={`text-xs text-gray-400 mt-2 space-y-1 ${kh ? 'font-khmer' : ''}`}>
+                      {(kh ? plan.featuresKh : plan.features).map((f) => (
+                        <li key={f}>✓ {f}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-                <p className={`text-sm text-gray-300 ${kh ? 'font-khmer' : ''}`}>{kh ? plan.limitKh : plan.limit}</p>
-                {plan.features.length > 0 && (
-                  <ul className={`text-xs text-gray-400 mt-2 mb-4 space-y-1 ${kh ? 'font-khmer' : ''}`}>
-                    {(kh ? plan.featuresKh : plan.features).map((f) => (
-                      <li key={f}>✓ {f}</li>
-                    ))}
-                  </ul>
-                )}
-                {plan.features.length === 0 && <div className="mb-6" />}
                 <Link
                   href={plan.href}
-                  className={`block text-center py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                  className={`block text-center py-2.5 rounded-xl text-sm font-semibold transition-colors mt-6 ${
                     plan.highlight
                       ? 'bg-accent hover:bg-accent-hover text-white'
                       : 'border border-white/20 hover:bg-white/5 text-white'
