@@ -127,21 +127,20 @@ export default function MessageItem({ message, lang, token }: Props) {
                 components={{
                   img: ({ src, alt }) => {
                     const srcStr = typeof src === 'string' ? src : ''
-                    if (srcStr.startsWith('POLLINATIONS:')) {
-                      const prompt = encodeURIComponent(srcStr.replace('POLLINATIONS:', ''))
-                      const imageUrl = `https://image.pollinations.ai/prompt/${prompt}?width=768&height=768&nologo=true`
+                    const isGenerated = srcStr.startsWith('/api/image?prompt=')
+                    if (isGenerated) {
                       return (
                         <div className="my-3">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src={imageUrl}
+                            src={srcStr}
                             alt={alt || 'AI generated image'}
                             className="rounded-xl max-w-full border border-gray-200 shadow-sm"
                             loading="lazy"
                           />
                           <div className="flex items-center gap-2 mt-2">
                             <a
-                              href={imageUrl}
+                              href={srcStr}
                               download={`angkorai-image-${Date.now()}.jpg`}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -160,7 +159,10 @@ export default function MessageItem({ message, lang, token }: Props) {
                   },
                 }}
               >
-                {message.content}
+                {message.content.replace(
+                  /!\[([^\]]*)\]\(POLLINATIONS:(.*?)\)/g,
+                  (_, alt, prompt) => `![${alt}](/api/image?prompt=${encodeURIComponent(prompt)})`
+                )}
               </ReactMarkdown>
             </div>
             {!message.streaming && message.content && (
