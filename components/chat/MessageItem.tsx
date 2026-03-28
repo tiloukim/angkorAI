@@ -57,7 +57,11 @@ export default function MessageItem({ message, lang, token }: Props) {
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
         console.error('TTS error:', err)
-        alert(`TTS error: ${err.error || res.status}`)
+        if (res.status === 400 && err.error?.includes('Khmer')) {
+          alert('Khmer text-to-speech is not yet available. Only English portions can be read aloud.')
+        } else {
+          alert(`TTS error: ${err.error || res.status}`)
+        }
         return
       }
       const { audio } = await res.json()

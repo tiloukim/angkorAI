@@ -20,11 +20,23 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ error: 'No text provided' }), { status: 400 })
     }
 
-    // Auto-detect language from text (Khmer Unicode block U+1780–U+17FF)
-    const isKhmer = /[\u1780-\u17FF]/.test(text)
-    const langCode = isKhmer ? 'km-KH' : 'en-US'
+    // Strip Khmer text — Google TTS doesn't support km-KH
+    // Keep only English/Latin text for TTS
+    let ttsText = text
+      .replace(/[\u1780-\u17FF\u19E0-\u19FF\u200B-\u200D]+/g, '') // Remove Khmer characters & zero-width
+      .replace(/\s{2,}/g, ' ')  // Collapse extra whitespace
+      .trim()
 
-    // Dynamically fetch the first available voice for the detected language
+    if (!ttsText) {
+      return new Response(
+        JSON.stringify({ error: 'Khmer text-to-speech is not yet available. Only English portions can be read aloud.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const langCode = 'en-US'
+
+    // Dynamically fetch the first available voice
     const voicesRes = await fetch(
       `https://texttospeech.googleapis.com/v1/voices?languageCode=${langCode}&key=${GOOGLE_TTS_KEY}`
     )
@@ -55,7 +67,7 @@ export async function POST(req: NextRequest) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          input: { text: text.slice(0, 4500) },
+          input: { text: ttsText.slice(0, 4500) },
           voice,
           audioConfig: { audioEncoding: 'MP3', speakingRate: 1.0 },
         }),
