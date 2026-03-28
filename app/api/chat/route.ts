@@ -59,6 +59,16 @@ Image Generation:
 - Make the prompt detailed and descriptive for better results
 - After the image tag, add a short bilingual description
 
+Video Generation:
+- You can generate short AI videos! When a user asks to create, generate, or make a video/animation/clip, respond with a brief description followed by the video tag.
+- Use this EXACT format to generate a video: ![video](VIDEO:detailed english prompt here)
+- The prompt after VIDEO: should be a detailed, descriptive English prompt for the video (even if the user asked in Khmer)
+- Example: User says "make a video of Angkor Wat" → You respond: "Here's a video of Angkor Wat! 🎬\n\n![Angkor Wat video](VIDEO:Angkor Wat temple with clouds moving slowly, birds flying, golden sunlight, cinematic drone shot, smooth camera movement)"
+- Always write the prompt in English for best quality
+- Make the prompt detailed with motion/action descriptions for better results
+- Note: Video generation takes about 1-2 minutes to complete
+- After the video tag, add a short bilingual description
+
 Always be respectful, accurate, and helpful. If you don't know something, say so honestly.`
 
 export async function POST(req: NextRequest) {

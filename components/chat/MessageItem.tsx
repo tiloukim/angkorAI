@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Sparkles, User, Volume2, VolumeX, Loader2, Download } from 'lucide-react'
 import type { Message } from './ChatLayout'
+import VideoPlayer from './VideoPlayer'
 
 interface Props {
   message: Message
@@ -127,6 +128,12 @@ export default function MessageItem({ message, lang, token }: Props) {
                 components={{
                   img: ({ src, alt }) => {
                     const srcStr = typeof src === 'string' ? src : ''
+                    // Video generation
+                    if (srcStr.startsWith('VIDEO_PROMPT:')) {
+                      const videoPrompt = decodeURIComponent(srcStr.replace('VIDEO_PROMPT:', ''))
+                      return <VideoPlayer prompt={videoPrompt} />
+                    }
+                    // Image generation
                     const isGenerated = srcStr.startsWith('/api/image?prompt=')
                     if (isGenerated) {
                       return (
@@ -159,10 +166,16 @@ export default function MessageItem({ message, lang, token }: Props) {
                   },
                 }}
               >
-                {message.content.replace(
-                  /!\[([^\]]*)\]\(POLLINATIONS:(.*?)\)/g,
-                  (_, alt, prompt) => `![${alt}](/api/image?prompt=${encodeURIComponent(prompt)})`
-                )}
+                {message.content
+                  .replace(
+                    /!\[([^\]]*)\]\(POLLINATIONS:(.*?)\)/g,
+                    (_, alt, prompt) => `![${alt}](/api/image?prompt=${encodeURIComponent(prompt)})`
+                  )
+                  .replace(
+                    /!\[([^\]]*)\]\(VIDEO:(.*?)\)/g,
+                    (_, alt, prompt) => `![${alt}](VIDEO_PROMPT:${encodeURIComponent(prompt)})`
+                  )
+                }
               </ReactMarkdown>
             </div>
             {!message.streaming && message.content && (
