@@ -3,7 +3,7 @@ import { getAuthUser, createServiceClient } from '@/lib/supabase/server'
 import { IMAGE_LIMITS, type Plan } from '@/lib/plans'
 
 const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY || ''
-const IMAGE_MODEL = 'luma/photon-flash'
+const IMAGE_MODEL = 'black-forest-labs/flux-schnell'
 
 export async function GET(req: NextRequest) {
   const user = await getAuthUser(req)
