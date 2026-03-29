@@ -286,14 +286,54 @@ export async function POST(req: NextRequest) {
           messages: chatMessages,
         })
       }
+    } else if (hasImage) {
+      // Vision request — use raw fetch (Groq SDK doesn't support multimodal content)
+      const visionRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+          max_tokens: 4096,
+          stream: true,
+          messages: chatMessages,
+        }),
+      })
+
+      if (!visionRes.ok || !visionRes.body) {
+        const err = await visionRes.text().catch(() => 'Vision request failed')
+        throw new Error(err)
+      }
+
+      // Convert fetch ReadableStream to async iterable
+      const visionReader = visionRes.body.getReader()
+      const visionDecoder = new TextDecoder()
+      stream = {
+        async *[Symbol.asyncIterator]() {
+          let buf = ''
+          while (true) {
+            const { done, value } = await visionReader.read()
+            if (done) break
+            buf += visionDecoder.decode(value, { stream: true })
+            const lines = buf.split('\n')
+            buf = lines.pop() ?? ''
+            for (const line of lines) {
+              if (!line.startsWith('data: ') || line === 'data: [DONE]') continue
+              try {
+                yield JSON.parse(line.slice(6))
+              } catch {}
+            }
+          }
+        },
+      }
     } else {
-      // Groq (primary) → Cerebras (fallback)
-      // Use vision model when image is attached
-      const chatModel = hasImage ? 'meta-llama/llama-4-scout-17b-16e-instruct' : model
+      // Regular chat: Groq (primary) → Cerebras (fallback)
       try {
         const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
         stream = await groq.chat.completions.create({
-          model: chatModel,
+          model,
           max_tokens: 4096,
           stream: true,
           messages: chatMessages,
