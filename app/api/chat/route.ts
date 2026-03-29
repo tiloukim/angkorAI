@@ -182,19 +182,8 @@ export async function POST(req: NextRequest) {
     const flatMessages = messages.map((m: { role: string; content: any }, idx: number) => {
       const isLastUser = idx === messages.length - 1 && m.role === 'user'
       if (Array.isArray(m.content) && isLastUser && hasImage) {
-        // Keep multimodal content for vision model, but limit image size
-        const parts = m.content.map((p: { type: string; text?: string; image_url?: { url: string } }) => {
-          if (p.type === 'image_url' && p.image_url?.url) {
-            let url = p.image_url.url
-            // Truncate very large base64 images (>500KB) to prevent Groq errors
-            if (url.startsWith('data:') && url.length > 700_000) {
-              url = url.slice(0, 700_000)
-            }
-            return { type: 'image_url', image_url: { url } }
-          }
-          return p
-        })
-        return { role: m.role as 'user' | 'assistant', content: parts }
+        // Keep multimodal content for vision model
+        return { role: m.role as 'user' | 'assistant', content: m.content }
       }
       return {
         role: m.role as 'user' | 'assistant',
