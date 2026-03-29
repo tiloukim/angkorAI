@@ -229,12 +229,13 @@ export default function ChatLayout({ userId, userEmail, plan, token }: Props) {
       // Refresh sidebar — server auto-generates title after first exchange
       fetchConversations()
     } catch (err) {
-      console.error(err)
+      console.error('Chat error:', err)
+      const errMsg = err instanceof Error ? err.message : 'Unknown error'
       setMessages((prev) => [
         ...prev.slice(0, -1),
         {
           ...prev[prev.length - 1],
-          content: 'Sorry, something went wrong. Please try again.',
+          content: `Sorry, something went wrong: ${errMsg}. Please try again.`,
           streaming: false,
         },
       ])
