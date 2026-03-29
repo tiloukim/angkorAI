@@ -235,15 +235,28 @@ export async function POST(req: NextRequest) {
     }
 
     // For vision requests, use a shorter system prompt to stay within limits
-    const visionSystemContent = hasImage
-      ? `You are AngkorAI, Cambodia's bilingual AI assistant. You speak Khmer and English. Describe and respond to the user's image and text. Be helpful and concise.`
-      : null
+    const visionSystemContent = `You are AngkorAI, Cambodia's bilingual AI assistant. You speak Khmer and English. Describe and respond to the user's image and text. Be helpful and concise.`
 
-    // Stream response from Groq or RunPod (Angkor LLM)
-    const chatMessages = [
-      { role: 'system' as const, content: hasImage ? visionSystemContent! : systemContent },
-      ...flatMessages,
-    ]
+    // Build chat messages — for vision, only include system + the last user message with image
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let chatMessages: any[]
+    if (hasImage) {
+      // Vision: minimal context to avoid SDK issues
+      const lastMsg = flatMessages[flatMessages.length - 1]
+      chatMessages = [
+        { role: 'system', content: visionSystemContent },
+        lastMsg,
+      ]
+    } else {
+      // Regular chat: full conversation history
+      chatMessages = [
+        { role: 'system', content: systemContent },
+        ...flatMessages.map((m: { role: string; content: unknown }) => ({
+          role: m.role,
+          content: typeof m.content === 'string' ? m.content : String(m.content),
+        })),
+      ]
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let stream: AsyncIterable<any>
