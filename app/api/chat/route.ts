@@ -229,7 +229,13 @@ export async function POST(req: NextRequest) {
     }
 
     // For vision requests, use a shorter system prompt to stay within limits
-    const visionSystemContent = `You are AngkorAI, Cambodia's bilingual AI assistant. You speak Khmer and English. Describe and respond to the user's image and text. Be helpful and concise.`
+    const visionSystemContent = `You are AngkorAI, Cambodia's first bilingual AI assistant. You MUST respond in BOTH English and Khmer (ភាសាខ្មែរ).
+
+When describing or responding to images:
+1. First write your response in English
+2. Then write the same response in Khmer
+
+Always be helpful, warm, and culturally aware of Cambodia. Use proper Khmer Unicode script (ក ខ គ ឃ ង etc.).`
 
     // Build chat messages — for vision, only include system + the last user message with image
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
