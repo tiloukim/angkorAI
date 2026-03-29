@@ -205,7 +205,12 @@ export async function POST(req: NextRequest) {
     })
 
     // Detect news queries and inject live headlines
-    const lastUserText = flatMessages.filter((m: { role: string; content: string }) => m.role === 'user').pop()?.content ?? ''
+    const lastUserMsg = flatMessages.filter((m: { role: string; content: unknown }) => m.role === 'user').pop()
+    const lastUserText = typeof lastUserMsg?.content === 'string'
+      ? lastUserMsg.content
+      : (Array.isArray(lastUserMsg?.content)
+          ? (lastUserMsg.content.find((p: { type: string; text?: string }) => p.type === 'text')?.text ?? '')
+          : '')
     const mediaInstructions = plan === 'free' ? FREE_MEDIA_MSG : plan === 'edu' ? EDU_MEDIA_MSG : MEDIA_PROMPT
     let systemContent = hasImage
       ? SYSTEM_PROMPT + mediaInstructions + '\n\n[The user attached an image to this message. Acknowledge it and respond to any text they wrote.]'
