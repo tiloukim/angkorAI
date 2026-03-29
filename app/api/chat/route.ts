@@ -177,14 +177,21 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Flatten any vision content arrays to plain text (Groq doesn't yet support multimodal via chat completions)
+    // Keep vision content for the last user message if it has an image; flatten the rest
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const flatMessages = messages.map((m: { role: string; content: any }) => ({
-      role: m.role as 'user' | 'assistant',
-      content: Array.isArray(m.content)
-        ? (m.content.find((p: { type: string; text?: string }) => p.type === 'text')?.text ?? '')
-        : String(m.content),
-    }))
+    const flatMessages = messages.map((m: { role: string; content: any }, idx: number) => {
+      const isLastUser = idx === messages.length - 1 && m.role === 'user'
+      if (Array.isArray(m.content) && isLastUser && hasImage) {
+        // Keep multimodal content for vision model
+        return { role: m.role as 'user' | 'assistant', content: m.content }
+      }
+      return {
+        role: m.role as 'user' | 'assistant',
+        content: Array.isArray(m.content)
+          ? (m.content.find((p: { type: string; text?: string }) => p.type === 'text')?.text ?? '')
+          : String(m.content),
+      }
+    })
 
     // Detect news queries and inject live headlines
     const lastUserText = flatMessages.filter((m: { role: string; content: string }) => m.role === 'user').pop()?.content ?? ''
@@ -252,10 +259,12 @@ export async function POST(req: NextRequest) {
       }
     } else {
       // Groq (primary) → Cerebras (fallback)
+      // Use vision model when image is attached
+      const chatModel = hasImage ? 'meta-llama/llama-4-scout-17b-16e-instruct' : model
       try {
         const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
         stream = await groq.chat.completions.create({
-          model,
+          model: chatModel,
           max_tokens: 4096,
           stream: true,
           messages: chatMessages,
