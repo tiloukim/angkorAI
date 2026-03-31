@@ -32,6 +32,12 @@ export async function POST(req: NextRequest) {
     { onConflict: 'id' }
   )
 
+  // Ensure central membership row exists
+  if (user.email) {
+    const { ensureMembership } = await import('@/lib/membership')
+    await ensureMembership(user.email, 'angkorai').catch(() => {})
+  }
+
   const { title } = await req.json().catch(() => ({ title: 'New chat' }))
 
   const { data, error } = await supabase
