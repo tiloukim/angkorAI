@@ -386,7 +386,7 @@ export default function AdminDashboard({ userId, supportChats: initialChats, ini
                   <tbody>
                     {users.map(user => (
                       <tr key={user.id} className="border-t border-gray-100 hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium text-gray-900">{user.name || 'No name'}</td>
+                        <td className="px-4 py-3 font-medium text-gray-900">{user.name || user.email?.split('@')[0] || 'Unknown'}</td>
                         <td className="px-4 py-3 text-gray-600">{user.email || user.id.slice(0, 8)}</td>
                         <td className="px-4 py-3">
                           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
