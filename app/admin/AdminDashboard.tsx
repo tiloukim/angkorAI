@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { MessageCircle, X, Send, Wifi, WifiOff, ArrowLeft, GraduationCap, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { MessageCircle, X, Send, Wifi, WifiOff, ArrowLeft, GraduationCap, CheckCircle, XCircle, Loader2, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface SupportChat {
@@ -40,7 +40,7 @@ interface Props {
 }
 
 export default function AdminDashboard({ userId, supportChats: initialChats, initialOnline, pendingEduCount }: Props) {
-  const [activeTab, setActiveTab] = useState<'support' | 'edu'>('support')
+  const [activeTab, setActiveTab] = useState<'support' | 'edu' | 'users'>('support')
   const [chats, setChats] = useState(initialChats)
   const [selectedChat, setSelectedChat] = useState<string | null>(null)
   const [messages, setMessages] = useState<SupportMessage[]>([])
@@ -55,6 +55,53 @@ export default function AdminDashboard({ userId, supportChats: initialChats, ini
   const [eduLoading, setEduLoading] = useState(false)
   const [eduCount, setEduCount] = useState(pendingEduCount)
   const [processingId, setProcessingId] = useState<string | null>(null)
+
+  // Users state
+  interface UserProfile {
+    id: string
+    name?: string
+    plan: string
+    is_owner: boolean
+    created_at: string
+    email?: string
+  }
+  const [users, setUsers] = useState<UserProfile[]>([])
+  const [usersLoading, setUsersLoading] = useState(false)
+  const [updatingUserId, setUpdatingUserId] = useState<string | null>(null)
+
+  async function loadUsers() {
+    setUsersLoading(true)
+    try {
+      const supabase = createClient()
+      const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
+      if (data) {
+        // Fetch emails from auth
+        const res = await fetch('/api/admin/users')
+        if (res.ok) {
+          const emailMap = await res.json()
+          setUsers(data.map((u: UserProfile) => ({ ...u, email: emailMap[u.id] || '' })))
+        } else {
+          setUsers(data)
+        }
+      }
+    } catch { /* ignore */ }
+    setUsersLoading(false)
+  }
+
+  async function updateUserPlan(userId: string, plan: string) {
+    setUpdatingUserId(userId)
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, plan }),
+      })
+      if (res.ok) {
+        setUsers(prev => prev.map(u => u.id === userId ? { ...u, plan } : u))
+      }
+    } catch { /* ignore */ }
+    setUpdatingUserId(null)
+  }
 
   async function loadEduApps() {
     setEduLoading(true)
@@ -87,6 +134,7 @@ export default function AdminDashboard({ userId, supportChats: initialChats, ini
 
   useEffect(() => {
     if (activeTab === 'edu') loadEduApps()
+    if (activeTab === 'users') loadUsers()
   }, [activeTab])
 
   // Refresh chats list
@@ -286,6 +334,18 @@ export default function AdminDashboard({ userId, supportChats: initialChats, ini
                 {eduCount > 0 && <span className="bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full">{eduCount}</span>}
               </span>
             </button>
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'users' ? 'bg-purple-50 text-purple-600' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <span className="flex items-center gap-1.5">
+                <Users size={14} />
+                Users
+                <span className="bg-gray-200 text-gray-600 text-xs px-1.5 py-0.5 rounded-full">{users.length || '...'}</span>
+              </span>
+            </button>
           </div>
         </div>
         <button
@@ -298,7 +358,70 @@ export default function AdminDashboard({ userId, supportChats: initialChats, ini
         </button>
       </div>
 
-      {activeTab === 'edu' ? (
+      {activeTab === 'users' ? (
+        /* Users Panel */
+        <div className="h-[calc(100vh-65px)] overflow-y-auto p-6">
+          {usersLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 size={24} className="animate-spin text-purple-500" />
+            </div>
+          ) : (
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-800">All Users ({users.length})</h2>
+                <button onClick={loadUsers} className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1 border border-gray-200 rounded-lg">Refresh</button>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 text-left text-gray-500 text-xs uppercase">
+                      <th className="px-4 py-3">User</th>
+                      <th className="px-4 py-3">Email</th>
+                      <th className="px-4 py-3">Plan</th>
+                      <th className="px-4 py-3">Role</th>
+                      <th className="px-4 py-3">Joined</th>
+                      <th className="px-4 py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map(user => (
+                      <tr key={user.id} className="border-t border-gray-100 hover:bg-gray-50">
+                        <td className="px-4 py-3 font-medium text-gray-900">{user.name || 'No name'}</td>
+                        <td className="px-4 py-3 text-gray-600">{user.email || user.id.slice(0, 8)}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            user.plan === 'pro' ? 'bg-yellow-100 text-yellow-800' :
+                            user.plan === 'edu' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {user.plan}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          {user.is_owner && <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Admin</span>}
+                        </td>
+                        <td className="px-4 py-3 text-gray-500 text-xs">{new Date(user.created_at).toLocaleDateString()}</td>
+                        <td className="px-4 py-3">
+                          <select
+                            value={user.plan}
+                            onChange={e => updateUserPlan(user.id, e.target.value)}
+                            disabled={updatingUserId === user.id}
+                            className="text-xs border border-gray-200 rounded px-2 py-1 bg-white disabled:opacity-50"
+                          >
+                            <option value="free">Free</option>
+                            <option value="pro">Pro</option>
+                            <option value="edu">Edu</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : activeTab === 'edu' ? (
         /* Edu Applications Panel */
         <div className="h-[calc(100vh-65px)] overflow-y-auto p-6">
           {eduLoading ? (
